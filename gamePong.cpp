@@ -67,7 +67,7 @@ bool PongGame::init()
         return false;
     }
 
-    // Init SDL_mixer
+    // Initialize SDL_mixer
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
     {
         cout << "SDL_mixer không thể khởi tạo! SDL_mixer Error: " << Mix_GetError() << endl;
@@ -79,28 +79,63 @@ bool PongGame::init()
 
 bool PongGame::loadMedia()
 {
+    bool success = true;
+
     // Load font
-    gFont = TTF_OpenFont("arialbi.ttf", 28);
+    gFont = TTF_OpenFont("VHMUSTI.ttf", 36);
     if (gFont == nullptr)
     {
         cout << "Failed to load font! SDL_ttf Error: " << TTF_GetError() << endl;
-
+        success = false;
     }
+
+    // Load background image
+    gBackgroundTexture = IMG_LoadTexture(gRenderer, "space_background_1200x600.png");
+    if (gBackgroundTexture == nullptr)
+    {
+        cout << "Failed to load background texture! SDL_image Error: " << IMG_GetError() << endl;
+        success = false;
+    }
+
+    // Load paddle images
+    //gPaddleTexture = IMG_LoadTexture(gRenderer, "paddle_blue.png");
+    //if (gPaddleTexture == nullptr)
+   // {
+    //    cout << "Failed to load paddle texture! SDL_image Error: " << IMG_GetError() << endl;
+    //    success = false;
+   // }
+
+    // Load ball image
+    gBallTexture = IMG_LoadTexture(gRenderer, "puck.png");
+    if (gBallTexture == nullptr)
+    {
+        cout << "Failed to load ball texture! SDL_image Error: " << IMG_GetError() << endl;
+        success = false;
+    }
+
+    // Load menu background
+
 
     // Load sounds
     gHitSound = Mix_LoadWAV("bounce.wav");
     if (gHitSound == nullptr)
     {
         cout << "Failed to load hit sound effect! SDL_mixer Error: " << Mix_GetError() << endl;
-
+        success = false;
     }
 
-    return true;
+    //gScoreSound = Mix_LoadWAV("score.wav");
+   // if (gScoreSound == nullptr)
+   // {
+    //    cout << "Failed to load score sound effect! SDL_mixer Error: " << Mix_GetError() << endl;
+
+    //}
+
+    return success;
 }
 
 void PongGame::close()
 {
-    // Free loaded images
     if (gBackgroundTexture != nullptr)
     {
         SDL_DestroyTexture(gBackgroundTexture);
@@ -117,7 +152,6 @@ void PongGame::close()
         gBallTexture = nullptr;
     }
 
-    // Free sounds
     if (gHitSound != nullptr)
     {
         Mix_FreeChunk(gHitSound);
@@ -129,14 +163,12 @@ void PongGame::close()
         gScoreSound = nullptr;
     }
 
-    // Free font
     if (gFont != nullptr)
     {
         TTF_CloseFont(gFont);
         gFont = nullptr;
     }
 
-    // Destroy window and renderer
     if (gRenderer != nullptr)
     {
         SDL_DestroyRenderer(gRenderer);
@@ -149,7 +181,7 @@ void PongGame::close()
         gWindow = nullptr;
     }
 
-    // Quit SDL subsystems
+    // Quit SDL
     Mix_Quit();
     TTF_Quit();
     IMG_Quit();
@@ -198,7 +230,7 @@ void PongGame::updatePaddle(Paddle &paddle)
     // Move paddle
     paddle.rect.y += paddle.speed;
 
-    // Limit paddle movement to screen bounds
+    // Limit movement
     if (paddle.rect.y < 0)
     {
         paddle.rect.y = 0;
@@ -211,25 +243,24 @@ void PongGame::updatePaddle(Paddle &paddle)
 
 void PongGame::updateAI()
 {
-    // Simple AI to follow the ball
-    int AI_DIFFICUTY = 50;
+    int AI_DIFFICUTY = 30;
     int paddleCenter = rightPaddle.rect.y + rightPaddle.rect.h / 2;
     int ballCenter = ball.rect.y + ball.rect.h / 2;
-    int aimove_speed = AI_SPEED - (rand() % 6);
-    // Only move if the ball is moving towards the AI paddle
-    if (ball.speedX > 0)
+    int moveSpeed = AI_SPEED - (rand() % 5);
+    // Only move if the ball is moving towards
+    if (ball.speedX > 0 && ball.rect.x > SCREEN_WIDTH / 2)
     {
         // Add some difficulty by limiting AI reaction
         if (paddleCenter < ballCenter - AI_DIFFICUTY)
         {
-            rightPaddle.rect.y += aimove_speed;
+            rightPaddle.rect.y += moveSpeed;
         }
         else if (paddleCenter > ballCenter + AI_DIFFICUTY)
         {
-            rightPaddle.rect.y -= aimove_speed;
+            rightPaddle.rect.y -= moveSpeed;
         }
 
-        // Limit paddle movement to screen bounds
+        // Limit movement
         if (rightPaddle.rect.y < 0)
         {
             rightPaddle.rect.y = 0;
@@ -241,7 +272,7 @@ void PongGame::updateAI()
     }
 }
 
-void PongGame::resetBall()
+void PongGame::resetBall(int Direct)
 {
 
     ball.rect.x = SCREEN_WIDTH / 2 - BALL_SIZE / 2;
@@ -249,8 +280,8 @@ void PongGame::resetBall()
     ball.rect.w = BALL_SIZE;
     ball.rect.h = BALL_SIZE;
 
-    ball.speedX = ((rand() % 2) == 0) ? BALL_MAX_SPEED : -BALL_MAX_SPEED;
-    ball.speedY = ((rand() % 2) == 0) ? BALL_MAX_SPEED : -BALL_MAX_SPEED;
+    ball.speedX =  Direct*BALL_MIN_SPEED;
+    ball.speedY =  Direct*BALL_MIN_SPEED;
 }
 
 void PongGame::updateBall()
@@ -259,29 +290,50 @@ void PongGame::updateBall()
     ball.rect.x += ball.speedX;
     ball.rect.y += ball.speedY;
 
-    // Ball collision with top
+    //  impact with top
     if (ball.rect.y <= 0)
     {
         ball.rect.y = 0;
-        ball.speedY = -ball.speedY;
+        ball.speedY = -ball.speedY + (rand() % 3 - 1);
+        ball.speedX =  ball.speedX + (rand() % 3 - 1);
+
+        if (abs(ball.speedY) < BALL_MIN_SPEED) ball.speedY = ((ball.speedY > 0) ? 1 : -1) * BALL_MIN_SPEED;
+        if (abs(ball.speedX) < BALL_MIN_SPEED) ball.speedX = ((ball.speedX > 0) ? 1 : -1) * BALL_MIN_SPEED;
+
+        if (abs(ball.speedY) > BALL_MAX_SPEED) ball.speedY = ((ball.speedY > 0) ? 1 : -1) * BALL_MAX_SPEED;
+        if (abs(ball.speedX) > BALL_MAX_SPEED) ball.speedX = ((ball.speedX > 0) ? 1 : -1) * BALL_MAX_SPEED;
+
     }
-    // Ball collision with bottom
+    //  impact with bottom
     else if (ball.rect.y + ball.rect.h >= SCREEN_HEIGHT)
     {
         ball.rect.y = SCREEN_HEIGHT - ball.rect.h;
-        ball.speedY = -ball.speedY;
+        ball.speedY = -ball.speedY + (rand() % 3 - 1);
+        ball.speedX =  ball.speedX + (rand() % 3 - 1);
+
+        if (abs(ball.speedY) < BALL_MIN_SPEED) ball.speedY = ((ball.speedY > 0) ? 1 : -1) * BALL_MIN_SPEED;
+        if (abs(ball.speedX) < BALL_MIN_SPEED) ball.speedX = ((ball.speedX > 0) ? 1 : -1) * BALL_MIN_SPEED;
+
+        if (abs(ball.speedY) > BALL_MAX_SPEED) ball.speedY = ((ball.speedY > 0) ? 1 : -1) * BALL_MAX_SPEED;
+        if (abs(ball.speedX) > BALL_MAX_SPEED) ball.speedX = ((ball.speedX > 0) ? 1 : -1) * BALL_MAX_SPEED;
+
     }
 
-    // Ball collision with left paddle
+    // impact with left paddle
     if (ball.speedX < 0 &&
-            ball.rect.x < leftPaddle.rect.x + leftPaddle.rect.w &&
-            ball.rect.x + ball.rect.w > leftPaddle.rect.x &&
-            ball.rect.y < leftPaddle.rect.y + leftPaddle.rect.h &&
-            ball.rect.y + ball.rect.h > leftPaddle.rect.y)
+            ball.rect.x <= leftPaddle.rect.x + leftPaddle.rect.w &&
+            ball.rect.x + ball.rect.w >= leftPaddle.rect.x &&
+            ball.rect.y <= leftPaddle.rect.y + leftPaddle.rect.h &&
+            ball.rect.y + ball.rect.h >= leftPaddle.rect.y)
     {
 
-        ball.speedX = -ball.speedX;
-        //ball.speedY = randAngle();
+        ball.speedX = -ball.speedX + (rand() % 3 - 1);
+        ball.speedY =  ball.speedY + (rand() % 3 - 1);
+
+        if (ball.speedX <= 0) ball.speedX = BALL_MIN_SPEED;
+        if (abs(ball.speedY) < BALL_MIN_SPEED) ball.speedY = ((ball.speedY > 0) ? 1 : -1) * BALL_MIN_SPEED;
+        if (abs(ball.speedY) > BALL_MAX_SPEED) ball.speedY = ((ball.speedY > 0) ? 1 : -1) * BALL_MAX_SPEED;
+
 
         // Play hit sound
         if (gHitSound != nullptr)
@@ -290,17 +342,26 @@ void PongGame::updateBall()
         }
     }
 
-    // Ball collision with right paddle
+    // impact with right paddle
     if (ball.speedX > 0 &&
-            ball.rect.x < rightPaddle.rect.x + rightPaddle.rect.w &&
-            ball.rect.x + ball.rect.w > rightPaddle.rect.x &&
-            ball.rect.y < rightPaddle.rect.y + rightPaddle.rect.h &&
-            ball.rect.y + ball.rect.h > rightPaddle.rect.y)
+            ball.rect.x <= rightPaddle.rect.x + rightPaddle.rect.w &&
+            ball.rect.x + ball.rect.w >= rightPaddle.rect.x &&
+            ball.rect.y <= rightPaddle.rect.y + rightPaddle.rect.h &&
+            ball.rect.y + ball.rect.h >= rightPaddle.rect.y)
     {
 
-        ball.speedX = -ball.speedX;
+
+        ball.speedX = -ball.speedX + (rand() % 3 - 1);
+        ball.speedY =  ball.speedY + (rand() % 3 - 1);
+
+        if (ball.speedX <= 0) ball.speedX = -BALL_MIN_SPEED;
+        if (abs(ball.speedY) < BALL_MIN_SPEED) ball.speedY = ((ball.speedY > 0) ? 1 : -1) * BALL_MIN_SPEED;
+        if (abs(ball.speedY) > BALL_MAX_SPEED) ball.speedY = ((ball.speedY > 0) ? 1 : -1) * BALL_MAX_SPEED;
+
+
         // Play hit sound
-        if (gHitSound != nullptr) {
+        if (gHitSound != nullptr)
+        {
             Mix_PlayChannel(-1, gHitSound, 0);
         }
     }
@@ -311,16 +372,19 @@ void PongGame::updateBall()
         // Right player scores
         rightPaddle.score++;
 
-        resetBall();
+        SDL_Delay(100);
+        if(rightPaddle.score > leftPaddle.score) resetBall(1);
+        else if(rightPaddle.score < leftPaddle.score) resetBall(-1);
+        else resetBall((rand() % 2 == 0) ? 1 : -1);
     }
     else if (ball.rect.x > SCREEN_WIDTH)
     {
         // Left player scores
         leftPaddle.score++;
-
-        // Play score sound
-
-        resetBall();
+        SDL_Delay(100);
+        if(rightPaddle.score > leftPaddle.score) resetBall(1);
+        else if(rightPaddle.score < leftPaddle.score) resetBall(-1);
+        else resetBall((rand() % 2 == 0) ? 1 : -1);
     }
 }
 
@@ -336,7 +400,7 @@ void PongGame::renderGame()
         SDL_RenderCopy(gRenderer, gBackgroundTexture, nullptr, nullptr);
     }
 
-    // Draw center line
+    // Draw center line (giữ nguyên nếu muốn hiệu ứng này)
     SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
     for (int y = 0; y < SCREEN_HEIGHT; y += 10)
     {
@@ -344,36 +408,79 @@ void PongGame::renderGame()
         SDL_RenderFillRect(gRenderer, &centerLine);
     }
 
-    // Draw paddles
-    SDL_SetRenderDrawColor(gRenderer, 0, 0, 255, 255);
-    SDL_RenderFillRect(gRenderer, &leftPaddle.rect);
-    SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);
-    SDL_RenderFillRect(gRenderer, &rightPaddle.rect);
+    // Render paddles with textures
+    if (gPaddleTexture != nullptr)
+    {
+        SDL_RenderCopy(gRenderer, gPaddleTexture, nullptr, &leftPaddle.rect);
+    }
+    else
+    {
+        // Fallback if texture loading failed
+        SDL_SetRenderDrawColor(gRenderer, 0, 0, 255, 255);
+        SDL_RenderFillRect(gRenderer, &leftPaddle.rect);
+    }
 
-    // Draw ball
-    SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
-    SDL_RenderFillRect(gRenderer, &ball.rect);
+    //if (gRightPaddleTexture != nullptr)
+    //{
+    //    SDL_RenderCopy(gRenderer, gRightPaddleTexture, nullptr, &rightPaddle.rect);
+    //}
+   // else
+   // {
+    //    // Fallback if texture loading failed
+       SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);
+       SDL_RenderFillRect(gRenderer, &rightPaddle.rect);
+    //}
+
+    // Render ball with texture
+    if (gBallTexture != nullptr)
+    {
+        SDL_RenderCopy(gRenderer, gBallTexture, nullptr, &ball.rect);
+    }
+    else
+    {
+        // Fallback if texture loading failed
+        SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
+        SDL_RenderFillRect(gRenderer, &ball.rect);
+    }
+
+    // Vẽ khung menu
+    //SDL_Rect menuRect = {SCREEN_WIDTH / 4, 10, SCREEN_WIDTH / 2, 60};
+
+    // Render menu background
+    //if (gMenuTexture != nullptr)
+    //{
+    //    SDL_RenderCopy(gRenderer, gMenuTexture, nullptr, &menuRect);
+   // }
+   // else
+    //{
+        // Fallback if texture loading failed
+        SDL_SetRenderDrawColor(gRenderer, 50, 50, 50, 200);
+        //SDL_RenderFillRect(gRenderer, &menuRect);
+
+        // Menu border
+        SDL_SetRenderDrawColor(gRenderer, 200, 200, 200, 255);
+        //SDL_RenderDrawRect(gRenderer, &menuRect);
+   // }
 
     // Render scores
     SDL_Color textColor = {255, 255, 255, 255};
     stringstream leftScoreText;
     leftScoreText << leftPaddle.score;
-    renderText(leftScoreText.str(), SCREEN_WIDTH / 4, 20, textColor);
+    renderText(leftScoreText.str(), SCREEN_WIDTH / 4, 20, {0, 0, 255, 255});
 
     stringstream rightScoreText;
     rightScoreText << rightPaddle.score;
-    renderText(rightScoreText.str(), 3 * SCREEN_WIDTH / 4, 20, textColor);
+    renderText(rightScoreText.str(), 3 * SCREEN_WIDTH / 4, 20, {255, 0, 0, 255});
 
     // Render game mode
     string modeText = (gameMode == PLAYER_VS_PLAYER) ? "Player vs Player" : "Player vs AI";
-    renderText(modeText, SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT - 40, textColor);
+    renderText(modeText, SCREEN_WIDTH / 2 - 120, SCREEN_HEIGHT - 40, textColor);
 
     // Controls reminder
-    renderText("Player 1:W/S", 20, SCREEN_HEIGHT - 40, textColor);
-
+    renderText("Player 1: W/S", 20, SCREEN_HEIGHT - 40, textColor);
     if (gameMode == PLAYER_VS_PLAYER)
     {
-        renderText("Player 2:UP/DOWN", SCREEN_WIDTH - 300, SCREEN_HEIGHT - 40, textColor);
+        renderText("Player 2: UP/DOWN", SCREEN_WIDTH - 300, SCREEN_HEIGHT - 40, textColor);
     }
 
     // Update screen
@@ -466,8 +573,20 @@ bool PongGame::showGameOverScreen()
 
         // Render game over text
         SDL_Color textColor = {255, 255, 255, 255};
-        string winnerText = leftPaddle.score >= MAX_SCORE ? "Player 1 Wins!" : "Player 2 Wins!";
-        renderText(winnerText, SCREEN_WIDTH / 2 - 100, 150, textColor);
+
+        if(gameMode == PLAYER_VS_PLAYER)
+            {
+             if(leftPaddle.score >= MAX_SCORE)
+                   renderText("Player 1 Wins!" , SCREEN_WIDTH / 2 - 100, 150, {0, 0, 255, 255});
+             else  renderText("Player 2 Wins!" , SCREEN_WIDTH / 2 - 100, 150, {255, 0, 0, 255});
+        }
+        else
+            {
+             if(leftPaddle.score >= MAX_SCORE)
+                   renderText("WIN!" , SCREEN_WIDTH / 2 - 30, 150, {0, 0, 255, 255});
+             else  renderText("LOSE" , SCREEN_WIDTH / 2 - 30, 150, {255, 0, 0, 255});
+        }
+
         renderText("Press R - Restart Game", SCREEN_WIDTH / 2 - 120, 250, textColor);
         renderText("press M - Back to Menu", SCREEN_WIDTH / 2 - 120, 300, textColor);
         renderText("press ESC - Quit", SCREEN_WIDTH / 2 - 120, 350, textColor);
@@ -481,7 +600,7 @@ bool PongGame::showGameOverScreen()
         leftPaddle.score = 0;
         rightPaddle.score = 0;
 
-        resetBall();
+        resetBall((rand() % 2 == 0) ? 1 : -1);
         return true;
     }
 
@@ -499,11 +618,21 @@ bool PongGame::showGameOverScreen()
 void PongGame::run()
 {
     // Initialize game objects
-    leftPaddle = { {50, SCREEN_HEIGHT / 2 - PADDLE_HEIGHT / 2, PADDLE_WIDTH, PADDLE_HEIGHT}, 0, 0 };
+    leftPaddle =
+    {
+        {50, SCREEN_HEIGHT / 2 - PADDLE_HEIGHT / 2, PADDLE_WIDTH, PADDLE_HEIGHT},
+        0,
+        0
+    };
 
-    rightPaddle = { {SCREEN_WIDTH - 50 - PADDLE_WIDTH, SCREEN_HEIGHT / 2 - PADDLE_HEIGHT / 2, PADDLE_WIDTH, PADDLE_HEIGHT}, 0, 0};
+    rightPaddle =
+    {
+        {SCREEN_WIDTH - 50 - PADDLE_WIDTH, SCREEN_HEIGHT / 2 - PADDLE_HEIGHT / 2, PADDLE_WIDTH, PADDLE_HEIGHT},
+        0,
+        0
+    };
 
-    resetBall();
+    resetBall((rand() % 2 == 0) ? 1 : -1);
 
     // Show the main menu first
     if (!showMainMenu())
@@ -511,7 +640,6 @@ void PongGame::run()
         return;
     }
 
-    // Main game loop
     SDL_Event e;
     bool continueGame = true;
 
@@ -596,16 +724,14 @@ void PongGame::run()
 
         updateBall();
 
-        // Check for game over
         if (leftPaddle.score >= MAX_SCORE || rightPaddle.score >= MAX_SCORE)
         {
             continueGame = showGameOverScreen();
         }
 
-        // Render game
         renderGame();
 
-        SDL_Delay(9);
+        SDL_Delay(11);
     }
 }
 
