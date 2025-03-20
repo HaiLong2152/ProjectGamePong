@@ -7,6 +7,7 @@
 #include <SDL_mixer.h>
 #include <iostream>
 #include <string>
+#include <cmath>
 #include <sstream>
 #include <cstdlib>
 #include <ctime>
@@ -19,7 +20,8 @@ const int PADDLE_WIDTH = 15;
 const int PADDLE_HEIGHT = 100;
 const int BALL_SIZE = 20;
 const int PADDLE_SPEED = 10;
-const int BALL_MAX_SPEED = 8;
+const int BALL_MIN_SPEED = 8;
+const int BALL_MAX_SPEED = 11;
 const int AI_SPEED = 10;
 const int MAX_SCORE = 10;
 
@@ -31,7 +33,6 @@ enum GameMode
     PLAYER_VS_AI
 };
 
-// Game objects
 struct Paddle
 {
     SDL_Rect rect;
@@ -70,8 +71,7 @@ private:
     bool loadMedia();
     void close();
     void renderText(const string &text, int x, int y, SDL_Color color);
-    int randAngle();
-    void resetBall();
+    void resetBall(int Direct);
     void updatePaddle(Paddle &paddle);
     void updateAI();
     void updateBall();
