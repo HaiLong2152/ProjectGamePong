@@ -3,9 +3,12 @@
 PongGame::PongGame() :
     gWindow(nullptr),
     gRenderer(nullptr),
-    gFont(nullptr),
+    gFont24(nullptr),
+    gFont36(nullptr),
     gBackgroundTexture(nullptr),
-    gPaddleTexture(nullptr),
+    gMenuBackTexture(nullptr),
+    gLeftPaddleTexture(nullptr),
+    gRightPaddleTexture(nullptr),
     gBallTexture(nullptr),
     gHitSound(nullptr),
     gScoreSound(nullptr),
@@ -82,28 +85,48 @@ bool PongGame::loadMedia()
     bool success = true;
 
     // Load font
-    gFont = TTF_OpenFont("VHMUSTI.ttf", 36);
-    if (gFont == nullptr)
+    gFont24 = TTF_OpenFont("VHMUSTI.ttf", 24);
+    if (gFont24 == nullptr)
+    {
+        cout << "Failed to load font! SDL_ttf Error: " << TTF_GetError() << endl;
+        success = false;
+    }
+
+    gFont36 = TTF_OpenFont("VHMUSTI.ttf", 36);
+    if (gFont36 == nullptr)
     {
         cout << "Failed to load font! SDL_ttf Error: " << TTF_GetError() << endl;
         success = false;
     }
 
     // Load background image
-    gBackgroundTexture = IMG_LoadTexture(gRenderer, "space_background_1200x600.png");
+    gBackgroundTexture = IMG_LoadTexture(gRenderer, "hookeyfield.png");
     if (gBackgroundTexture == nullptr)
     {
         cout << "Failed to load background texture! SDL_image Error: " << IMG_GetError() << endl;
         success = false;
     }
-
+    // Load background menu & end
+    gMenuBackTexture = IMG_LoadTexture(gRenderer, "backgroundhockey.png");
+    if (gMenuBackTexture == nullptr)
+    {
+        cout << "Failed to load paddle texture! SDL_image Error: " << IMG_GetError() << endl;
+        success = false;
+    }
     // Load paddle images
-    //gPaddleTexture = IMG_LoadTexture(gRenderer, "paddle_blue.png");
-    //if (gPaddleTexture == nullptr)
-   // {
-    //    cout << "Failed to load paddle texture! SDL_image Error: " << IMG_GetError() << endl;
-    //    success = false;
-   // }
+    gLeftPaddleTexture = IMG_LoadTexture(gRenderer, "paddleblue.png");
+    if (gLeftPaddleTexture == nullptr)
+    {
+        cout << "Failed to load paddle texture! SDL_image Error: " << IMG_GetError() << endl;
+        success = false;
+    }
+
+    gRightPaddleTexture = IMG_LoadTexture(gRenderer, "paddlegreen.png");
+    if (gRightPaddleTexture == nullptr)
+    {
+        cout << "Failed to load paddle texture! SDL_image Error: " << IMG_GetError() << endl;
+        success = false;
+    }
 
     // Load ball image
     gBallTexture = IMG_LoadTexture(gRenderer, "puck.png");
@@ -112,8 +135,6 @@ bool PongGame::loadMedia()
         cout << "Failed to load ball texture! SDL_image Error: " << IMG_GetError() << endl;
         success = false;
     }
-
-    // Load menu background
 
 
     // Load sounds
@@ -125,8 +146,8 @@ bool PongGame::loadMedia()
     }
 
     //gScoreSound = Mix_LoadWAV("score.wav");
-   // if (gScoreSound == nullptr)
-   // {
+    // if (gScoreSound == nullptr)
+    // {
     //    cout << "Failed to load score sound effect! SDL_mixer Error: " << Mix_GetError() << endl;
 
     //}
@@ -141,10 +162,20 @@ void PongGame::close()
         SDL_DestroyTexture(gBackgroundTexture);
         gBackgroundTexture = nullptr;
     }
-    if (gPaddleTexture != nullptr)
+    if (gMenuBackTexture != nullptr)
     {
-        SDL_DestroyTexture(gPaddleTexture);
-        gPaddleTexture = nullptr;
+        SDL_DestroyTexture(gMenuBackTexture);
+        gMenuBackTexture = nullptr;
+    }
+    if (gLeftPaddleTexture != nullptr)
+    {
+        SDL_DestroyTexture(gLeftPaddleTexture);
+        gLeftPaddleTexture = nullptr;
+    }
+    if (gRightPaddleTexture != nullptr)
+    {
+        SDL_DestroyTexture(gRightPaddleTexture);
+        gRightPaddleTexture = nullptr;
     }
     if (gBallTexture != nullptr)
     {
@@ -163,10 +194,16 @@ void PongGame::close()
         gScoreSound = nullptr;
     }
 
-    if (gFont != nullptr)
+    if (gFont24 != nullptr)
     {
-        TTF_CloseFont(gFont);
-        gFont = nullptr;
+        TTF_CloseFont(gFont24);
+        gFont24 = nullptr;
+    }
+
+    if (gFont36 != nullptr)
+    {
+        TTF_CloseFont(gFont36);
+        gFont36 = nullptr;
     }
 
     if (gRenderer != nullptr)
@@ -188,7 +225,7 @@ void PongGame::close()
     SDL_Quit();
 }
 
-void PongGame::renderText(const string &text, int x, int y, SDL_Color color)
+void PongGame::renderText(const string &text, int x, int y, SDL_Color color ,TTF_Font* gFont)
 {
     if (gFont == nullptr)
     {
@@ -231,13 +268,13 @@ void PongGame::updatePaddle(Paddle &paddle)
     paddle.rect.y += paddle.speed;
 
     // Limit movement
-    if (paddle.rect.y < 0)
+    if (paddle.rect.y < 15)
     {
-        paddle.rect.y = 0;
+        paddle.rect.y = 15;
     }
-    else if (paddle.rect.y > SCREEN_HEIGHT - paddle.rect.h)
+    else if (paddle.rect.y > SCREEN_HEIGHT - 15 - paddle.rect.h)
     {
-        paddle.rect.y = SCREEN_HEIGHT - paddle.rect.h;
+        paddle.rect.y = SCREEN_HEIGHT - 15 - paddle.rect.h;
     }
 }
 
@@ -261,13 +298,13 @@ void PongGame::updateAI()
         }
 
         // Limit movement
-        if (rightPaddle.rect.y < 0)
+        if (rightPaddle.rect.y < 15)
         {
-            rightPaddle.rect.y = 0;
+            rightPaddle.rect.y = 15;
         }
-        else if (rightPaddle.rect.y > SCREEN_HEIGHT - rightPaddle.rect.h)
+        else if (rightPaddle.rect.y > SCREEN_HEIGHT - 15 - rightPaddle.rect.h)
         {
-            rightPaddle.rect.y = SCREEN_HEIGHT - rightPaddle.rect.h;
+            rightPaddle.rect.y = SCREEN_HEIGHT - 15 - rightPaddle.rect.h;
         }
     }
 }
@@ -291,9 +328,9 @@ void PongGame::updateBall()
     ball.rect.y += ball.speedY;
 
     //  impact with top
-    if (ball.rect.y <= 0)
+    if (ball.rect.y <= 15)
     {
-        ball.rect.y = 0;
+        ball.rect.y = 15;
         ball.speedY = -ball.speedY + (rand() % 3 - 1);
         ball.speedX =  ball.speedX + (rand() % 3 - 1);
 
@@ -305,9 +342,9 @@ void PongGame::updateBall()
 
     }
     //  impact with bottom
-    else if (ball.rect.y + ball.rect.h >= SCREEN_HEIGHT)
+    else if (ball.rect.y + ball.rect.h >= SCREEN_HEIGHT - 15)
     {
-        ball.rect.y = SCREEN_HEIGHT - ball.rect.h;
+        ball.rect.y = SCREEN_HEIGHT - ball.rect.h - 15;
         ball.speedY = -ball.speedY + (rand() % 3 - 1);
         ball.speedX =  ball.speedX + (rand() % 3 - 1);
 
@@ -400,88 +437,45 @@ void PongGame::renderGame()
         SDL_RenderCopy(gRenderer, gBackgroundTexture, nullptr, nullptr);
     }
 
-    // Draw center line (giữ nguyên nếu muốn hiệu ứng này)
-    SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
-    for (int y = 0; y < SCREEN_HEIGHT; y += 10)
-    {
-        SDL_Rect centerLine = {SCREEN_WIDTH / 2 - 2, y, 4, 5};
-        SDL_RenderFillRect(gRenderer, &centerLine);
-    }
 
     // Render paddles with textures
-    if (gPaddleTexture != nullptr)
+    if (gLeftPaddleTexture != nullptr)
     {
-        SDL_RenderCopy(gRenderer, gPaddleTexture, nullptr, &leftPaddle.rect);
-    }
-    else
-    {
-        // Fallback if texture loading failed
-        SDL_SetRenderDrawColor(gRenderer, 0, 0, 255, 255);
-        SDL_RenderFillRect(gRenderer, &leftPaddle.rect);
+        SDL_RenderCopy(gRenderer, gLeftPaddleTexture, nullptr, &leftPaddle.rect);
     }
 
-    //if (gRightPaddleTexture != nullptr)
-    //{
-    //    SDL_RenderCopy(gRenderer, gRightPaddleTexture, nullptr, &rightPaddle.rect);
-    //}
-   // else
-   // {
-    //    // Fallback if texture loading failed
-       SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);
-       SDL_RenderFillRect(gRenderer, &rightPaddle.rect);
-    //}
+    if (gRightPaddleTexture != nullptr)
+    {
+        SDL_RenderCopy(gRenderer, gRightPaddleTexture, nullptr, &rightPaddle.rect);
+    }
 
     // Render ball with texture
     if (gBallTexture != nullptr)
     {
         SDL_RenderCopy(gRenderer, gBallTexture, nullptr, &ball.rect);
     }
-    else
-    {
-        // Fallback if texture loading failed
-        SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
-        SDL_RenderFillRect(gRenderer, &ball.rect);
-    }
-
-    // Vẽ khung menu
-    //SDL_Rect menuRect = {SCREEN_WIDTH / 4, 10, SCREEN_WIDTH / 2, 60};
-
-    // Render menu background
-    //if (gMenuTexture != nullptr)
-    //{
-    //    SDL_RenderCopy(gRenderer, gMenuTexture, nullptr, &menuRect);
-   // }
-   // else
-    //{
-        // Fallback if texture loading failed
-        SDL_SetRenderDrawColor(gRenderer, 50, 50, 50, 200);
-        //SDL_RenderFillRect(gRenderer, &menuRect);
-
-        // Menu border
-        SDL_SetRenderDrawColor(gRenderer, 200, 200, 200, 255);
-        //SDL_RenderDrawRect(gRenderer, &menuRect);
-   // }
 
     // Render scores
-    SDL_Color textColor = {255, 255, 255, 255};
+    SDL_Color textColorBlack = {0, 0, 0, 0};
     stringstream leftScoreText;
     leftScoreText << leftPaddle.score;
-    renderText(leftScoreText.str(), SCREEN_WIDTH / 4, 20, {0, 0, 255, 255});
+    renderText(leftScoreText.str(), SCREEN_WIDTH / 4, 20, {0, 0, 255, 255}, gFont36);
 
     stringstream rightScoreText;
     rightScoreText << rightPaddle.score;
-    renderText(rightScoreText.str(), 3 * SCREEN_WIDTH / 4, 20, {255, 0, 0, 255});
+    renderText(rightScoreText.str(), 3 * SCREEN_WIDTH / 4, 20, {0, 255, 0, 255}, gFont36);
 
     // Render game mode
     string modeText = (gameMode == PLAYER_VS_PLAYER) ? "Player vs Player" : "Player vs AI";
-    renderText(modeText, SCREEN_WIDTH / 2 - 120, SCREEN_HEIGHT - 40, textColor);
+    renderText(modeText, SCREEN_WIDTH / 2 - 80, SCREEN_HEIGHT - 18, textColorBlack, gFont24);
 
     // Controls reminder
-    renderText("Player 1: W/S", 20, SCREEN_HEIGHT - 40, textColor);
     if (gameMode == PLAYER_VS_PLAYER)
     {
-        renderText("Player 2: UP/DOWN", SCREEN_WIDTH - 300, SCREEN_HEIGHT - 40, textColor);
+        renderText("Player 1: W/S", 70, SCREEN_HEIGHT - 18, textColorBlack, gFont24);
+        renderText("Player 2: UP/DOWN", SCREEN_WIDTH - 250, SCREEN_HEIGHT - 18, textColorBlack, gFont24);
     }
+    else renderText("W/S", 70, SCREEN_HEIGHT - 18, textColorBlack, gFont24);
 
     // Update screen
     SDL_RenderPresent(gRenderer);
@@ -523,12 +517,18 @@ bool PongGame::showMainMenu()
         SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 255);
         SDL_RenderClear(gRenderer);
 
+        if (gMenuBackTexture != nullptr)
+        {
+            SDL_RenderCopy(gRenderer, gMenuBackTexture, nullptr, nullptr);
+        }
+
+
         // Render menu text
         SDL_Color textColor = {255, 255, 255, 255};
-        renderText("PONG GAME", SCREEN_WIDTH / 2 - 100, 150, textColor);
-        renderText("Press 1. Player vs Player", SCREEN_WIDTH / 2 - 120, 250, textColor);
-        renderText("Press 2. Player vs AI", SCREEN_WIDTH / 2 - 120, 300, textColor);
-        renderText("Press ESC to quit", SCREEN_WIDTH / 2 - 120, 400, textColor);
+        renderText("PONG GAME", SCREEN_WIDTH / 2 - 100, 150, {255, 100, 255, 255}, gFont36);
+        renderText("Press 1. Player vs Player", SCREEN_WIDTH / 2 - 120, 250, textColor, gFont36);
+        renderText("Press 2. Player vs AI", SCREEN_WIDTH / 2 - 120, 300, textColor, gFont36);
+        renderText("Press ESC to quit", SCREEN_WIDTH / 2 - 120, 400, textColor, gFont36);
 
         SDL_RenderPresent(gRenderer);
     }
@@ -571,25 +571,30 @@ bool PongGame::showGameOverScreen()
         SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 255);
         SDL_RenderClear(gRenderer);
 
+        if (gMenuBackTexture != nullptr)
+        {
+            SDL_RenderCopy(gRenderer, gMenuBackTexture, nullptr, nullptr);
+        }
+
         // Render game over text
         SDL_Color textColor = {255, 255, 255, 255};
 
         if(gameMode == PLAYER_VS_PLAYER)
-            {
-             if(leftPaddle.score >= MAX_SCORE)
-                   renderText("Player 1 Wins!" , SCREEN_WIDTH / 2 - 100, 150, {0, 0, 255, 255});
-             else  renderText("Player 2 Wins!" , SCREEN_WIDTH / 2 - 100, 150, {255, 0, 0, 255});
+        {
+            if(leftPaddle.score >= MAX_SCORE)
+                renderText("Player 1 Wins!", SCREEN_WIDTH / 2 - 100, 150, {0, 0, 255, 255}, gFont36);
+            else  renderText("Player 2 Wins!", SCREEN_WIDTH / 2 - 100, 150, {255, 0, 0, 255}, gFont36);
         }
         else
-            {
-             if(leftPaddle.score >= MAX_SCORE)
-                   renderText("WIN!" , SCREEN_WIDTH / 2 - 30, 150, {0, 0, 255, 255});
-             else  renderText("LOSE" , SCREEN_WIDTH / 2 - 30, 150, {255, 0, 0, 255});
+        {
+            if(leftPaddle.score >= MAX_SCORE)
+                renderText("WIN!", SCREEN_WIDTH / 2 - 30, 150, {0, 0, 255, 255}, gFont36);
+            else  renderText("LOSE!", SCREEN_WIDTH / 2 - 30, 150, {255, 0, 0, 255}, gFont36);
         }
 
-        renderText("Press R - Restart Game", SCREEN_WIDTH / 2 - 120, 250, textColor);
-        renderText("press M - Back to Menu", SCREEN_WIDTH / 2 - 120, 300, textColor);
-        renderText("press ESC - Quit", SCREEN_WIDTH / 2 - 120, 350, textColor);
+        renderText("Press R - Restart Game", SCREEN_WIDTH / 2 - 120, 250, textColor, gFont36);
+        renderText("press M - Back to Menu", SCREEN_WIDTH / 2 - 120, 300, textColor, gFont36);
+        renderText("press ESC - Quit", SCREEN_WIDTH / 2 - 120, 350, textColor, gFont36);
 
         SDL_RenderPresent(gRenderer);
     }
@@ -731,7 +736,6 @@ void PongGame::run()
 
         renderGame();
 
-        SDL_Delay(11);
+        SDL_Delay(14);
     }
 }
-
