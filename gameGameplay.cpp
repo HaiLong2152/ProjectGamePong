@@ -56,7 +56,7 @@ void PongGame::resetBall(int Direct)
     ball.rect.h = BALL_SIZE;
 
     ball.speedX =  Direct*BALL_MIN_SPEED;
-    ball.speedY =  Direct*BALL_MIN_SPEED;
+    ball.speedY =  ((rand() % 2 == 0) ? 1 : -1) * BALL_MIN_SPEED;
 }
 
 void PongGame::updateBall()
