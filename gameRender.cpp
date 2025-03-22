@@ -156,14 +156,17 @@ bool PongGame::showGameOverScreen()
         {
             if(leftPaddle.score >= MAX_SCORE)
                 renderText("Player 1 Wins!", SCREEN_WIDTH / 2 - 100, 150, {0, 0, 255, 255}, gFont36);
-            else  renderText("Player 2 Wins!", SCREEN_WIDTH / 2 - 100, 150, {255, 0, 0, 255}, gFont36);
+            else  renderText("Player 2 Wins!", SCREEN_WIDTH / 2 - 100, 150, {0, 255, 0, 255}, gFont36);
         }
         else
         {
             if(leftPaddle.score >= MAX_SCORE)
-                renderText("WIN!", SCREEN_WIDTH / 2 - 30, 150, {0, 0, 255, 255}, gFont36);
-            else  renderText("LOSE!", SCREEN_WIDTH / 2 - 30, 150, {255, 0, 0, 255}, gFont36);
+                  renderText("YOU WIN!", SCREEN_WIDTH / 2 - 30, 150, {0, 0, 255, 255}, gFont36);
+            else  renderText("YOU LOSE!", SCREEN_WIDTH / 2 - 30, 150, {0, 255, 0, 255}, gFont36);
         }
+
+        string scoreText = to_string(leftPaddle.score) + " - " + to_string(rightPaddle.score);
+        renderText(scoreText.c_str(), SCREEN_WIDTH / 2 - 30, 200, textColor, gFont36);
 
         renderText("Press R - Restart Game", SCREEN_WIDTH / 2 - 120, 250, textColor, gFont36);
         renderText("press M - Back to Menu", SCREEN_WIDTH / 2 - 120, 300, textColor, gFont36);
