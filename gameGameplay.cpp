@@ -6,25 +6,25 @@ void PongGame::updatePaddle(Paddle &paddle)
     paddle.rect.y += paddle.speed;
 
     // Limit movement
-    if (paddle.rect.y < 23)
+    if (paddle.rect.y < 24)
     {
-        paddle.rect.y = 23;
+        paddle.rect.y = 24;
     }
-    else if (paddle.rect.y > SCREEN_HEIGHT - 23 - paddle.rect.h)
+    else if (paddle.rect.y > SCREEN_HEIGHT - 24 - paddle.rect.h)
     {
-        paddle.rect.y = SCREEN_HEIGHT - 23 - paddle.rect.h;
+        paddle.rect.y = SCREEN_HEIGHT - 24 - paddle.rect.h;
     }
 }
 
 void PongGame::updateAI()
 {
-    int AI_DIFFICUTY = 30;
+    int AI_DIFFICUTY = 10;
     int paddleCenter = rightPaddle.rect.y + rightPaddle.rect.h / 2;
     int ballCenter = ball.rect.y + ball.rect.h / 2;
-    int moveSpeed = AI_SPEED - (rand() % 5);
+    int moveSpeed = AI_SPEED - (rand() % 4);
 
     // Only move if the ball is moving towards and half screen
-    if (ball.speedX > 0 && ball.rect.x > SCREEN_WIDTH / 2)
+    if (ball.speedX > 0 && ball.rect.x > SCREEN_WIDTH / 2 - 20)
     {
         // Add some difficulty by limiting AI reaction
         if (paddleCenter < ballCenter - AI_DIFFICUTY)
@@ -55,12 +55,46 @@ void PongGame::resetBall(int Direct)
     ball.rect.w = BALL_SIZE;
     ball.rect.h = BALL_SIZE;
 
-    ball.speedX =  Direct*BALL_MIN_SPEED;
-    ball.speedY =  ((rand() % 2 == 0) ? 1 : -1) * BALL_MIN_SPEED;
+    ballResetDirection = Direct;
+
+    // Đặt thời gian reset và đánh dấu bóng đang chờ
+    ballResetTime = SDL_GetTicks() + BALL_WAIT_TIME;
+    isBallWaiting = true;
+
+    if (gCountdownSound !=nullptr)
+    {
+        Mix_Volume(-1, 18);
+        Mix_PlayChannel(-1, gCountdownSound, 0); // Phát âm thanh 1 lần
+    }
+
+    // Ngay lập tức đặt tốc độ bóng về 0
+    ball.speedX = 0;
+    ball.speedY = 0;
 }
 
 void PongGame::updateBall()
 {
+    if (isBallWaiting)
+    {
+        if (SDL_GetTicks() >= ballResetTime)
+        {
+            // Hết thời gian chờ, cho bóng bắt đầu di chuyển
+            isBallWaiting = false;
+
+            // Sử dụng hướng đã lưu
+            ball.speedX = ballResetDirection > 0 ? BALL_MIN_SPEED : -BALL_MIN_SPEED;
+            ball.speedY = (rand() % (2*BALL_MIN_SPEED)) - BALL_MIN_SPEED ;
+        }
+        else
+        {
+
+
+            // Trong thời gian chờ, giữ bóng ở vị trí giữa và không di chuyển
+            ball.speedX = 0;
+            ball.speedY = 0;
+        }
+    }
+
     // Move ball
     ball.rect.x += ball.speedX;
     ball.rect.y += ball.speedY;
@@ -94,42 +128,40 @@ void PongGame::updateBall()
 
     // impact with left paddle
     if (ball.speedX < 0 &&
-            ball.rect.x <= leftPaddle.rect.x + leftPaddle.rect.w &&
-            ball.rect.x + ball.rect.w >= leftPaddle.rect.x &&
-            ball.rect.y <= leftPaddle.rect.y + leftPaddle.rect.h &&
-            ball.rect.y + ball.rect.h >= leftPaddle.rect.y)
+            ball.rect.x < leftPaddle.rect.x + leftPaddle.rect.w &&
+            ball.rect.x + ball.rect.w > leftPaddle.rect.x + leftPaddle.rect.w &&
+            ball.rect.y + ball.rect.h > leftPaddle.rect.y &&
+            ball.rect.y < leftPaddle.rect.y + leftPaddle.rect.h)
     {
         ball.speedX = -ball.speedX + (rand() % 3 - 1);
         ball.speedY =  ball.speedY + (rand() % 3 - 1);
-
         if (ball.speedX <= 0) ball.speedX = BALL_MIN_SPEED;
         if (abs(ball.speedY) < BALL_MIN_SPEED) ball.speedY = ((ball.speedY > 0) ? 1 : -1) * BALL_MIN_SPEED;
         if (abs(ball.speedY) > BALL_MAX_SPEED) ball.speedY = ((ball.speedY > 0) ? 1 : -1) * BALL_MAX_SPEED;
-
         // Play hit sound
         if (gHitSound != nullptr)
         {
+            Mix_Volume(-1, 120);
             Mix_PlayChannel(-1, gHitSound, 0);
         }
     }
 
-    // impact with right paddle
+// impact with right paddle
     if (ball.speedX > 0 &&
-            ball.rect.x <= rightPaddle.rect.x + rightPaddle.rect.w &&
-            ball.rect.x + ball.rect.w >= rightPaddle.rect.x &&
-            ball.rect.y <= rightPaddle.rect.y + rightPaddle.rect.h &&
-            ball.rect.y + ball.rect.h >= rightPaddle.rect.y)
+            ball.rect.x + ball.rect.w > rightPaddle.rect.x &&
+            ball.rect.x < rightPaddle.rect.x &&
+            ball.rect.y + ball.rect.h > rightPaddle.rect.y &&
+            ball.rect.y < rightPaddle.rect.y + rightPaddle.rect.h)
     {
         ball.speedX = -ball.speedX + (rand() % 3 - 1);
         ball.speedY =  ball.speedY + (rand() % 3 - 1);
-
         if (ball.speedX <= 0) ball.speedX = -BALL_MIN_SPEED;
         if (abs(ball.speedY) < BALL_MIN_SPEED) ball.speedY = ((ball.speedY > 0) ? 1 : -1) * BALL_MIN_SPEED;
         if (abs(ball.speedY) > BALL_MAX_SPEED) ball.speedY = ((ball.speedY > 0) ? 1 : -1) * BALL_MAX_SPEED;
-
         // Play hit sound
         if (gHitSound != nullptr)
         {
+            Mix_Volume(-1, 120);
             Mix_PlayChannel(-1, gHitSound, 0);
         }
     }
@@ -140,7 +172,7 @@ void PongGame::updateBall()
         // Right player scores
         rightPaddle.score++;
 
-        SDL_Delay(100);
+        //SDL_Delay(100);
         if(rightPaddle.score > leftPaddle.score) resetBall(1);
         else if(rightPaddle.score < leftPaddle.score) resetBall(-1);
         else resetBall((rand() % 2 == 0) ? 1 : -1);
@@ -149,7 +181,7 @@ void PongGame::updateBall()
     {
         // Left player scores
         leftPaddle.score++;
-        SDL_Delay(100);
+        //SDL_Delay(100);
         if(rightPaddle.score > leftPaddle.score) resetBall(1);
         else if(rightPaddle.score < leftPaddle.score) resetBall(-1);
         else resetBall((rand() % 2 == 0) ? 1 : -1);

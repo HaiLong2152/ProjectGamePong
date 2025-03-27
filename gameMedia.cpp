@@ -64,6 +64,13 @@ bool PongGame::loadMedia()
         success = false;
     }
 
+    gCountdownSound = Mix_LoadWAV("countdown.mp3");
+    if (gCountdownSound == nullptr)
+    {
+        cout << "Failed to load count down sound effect! SDL_mixer Error: " << Mix_GetError() << endl;
+        success = false;
+    }
+
     //gScoreSound = Mix_LoadWAV("score.wav");
     // if (gScoreSound == nullptr)
     // {
@@ -110,6 +117,12 @@ void PongGame::close()
     {
         Mix_FreeChunk(gScoreSound);
         gScoreSound = nullptr;
+    }
+
+    if (gCountdownSound != nullptr)
+    {
+        Mix_FreeChunk(gCountdownSound);
+        gCountdownSound = nullptr;
     }
 
     if (gFont24 != nullptr)

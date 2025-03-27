@@ -17,7 +17,7 @@ void PongGame::run()
         0
     };
 
-    resetBall((rand() % 2 == 0) ? 1 : -1);
+
 
     // Show the main menu first
     if (!showMainMenu())
@@ -27,7 +27,7 @@ void PongGame::run()
 
     SDL_Event e;
     bool continueGame = true;
-
+    resetBall((rand() % 2 == 0) ? 1 : -1);
     while (continueGame && !quit)
     {
         // Handle events
@@ -109,13 +109,15 @@ void PongGame::run()
 
         updateBall();
 
-        if (leftPaddle.score >= MAX_SCORE || rightPaddle.score >= MAX_SCORE)
+
+        if ((leftPaddle.score >= MAX_SCORE || rightPaddle.score >= MAX_SCORE)
+            && abs(leftPaddle.score - rightPaddle.score) >=2 )
         {
             continueGame = showGameOverScreen();
         }
 
         renderGame();
 
-        SDL_Delay(14);
+        SDL_Delay(11);
     }
 }

@@ -33,13 +33,15 @@ private:
     SDL_Texture* gBallTexture;
     Mix_Chunk* gHitSound;
     Mix_Chunk* gScoreSound;
-
+    Mix_Chunk* gCountdownSound;
     GameMode gameMode;
     Paddle leftPaddle;
     Paddle rightPaddle;
     Ball ball;
     bool quit;
-
+    Uint32 ballResetTime;
+    bool isBallWaiting;
+    int ballResetDirection;
     bool init();
     bool loadMedia();
     void close();

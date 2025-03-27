@@ -12,11 +12,12 @@ const int BALL_SIZE = 30;
 
 // Physics
 const int PADDLE_SPEED = 10;
-const int BALL_MIN_SPEED = 8;
-const int BALL_MAX_SPEED = 11;
+const int BALL_MIN_SPEED = 9;
+const int BALL_MAX_SPEED = 12;
 const int AI_SPEED = 10;
 
 // Rules
 const int MAX_SCORE = 10;
 
+const Uint32 BALL_WAIT_TIME = 3000;
 #endif // CONSTS_H

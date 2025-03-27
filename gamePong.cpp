@@ -11,9 +11,13 @@ PongGame::PongGame() :
     gRightPaddleTexture(nullptr),
     gBallTexture(nullptr),
     gHitSound(nullptr),
-    gScoreSound(nullptr),
+    gCountdownSound(nullptr),
     gameMode(PLAYER_VS_PLAYER),
-    quit(false)
+    quit(false),
+    ballResetTime(0),
+    isBallWaiting(false),
+    ballResetDirection(0)
+
 {
 }
 
