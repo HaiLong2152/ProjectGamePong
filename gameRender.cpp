@@ -8,39 +8,29 @@ void PongGame::renderGame()
 
     // Render background
     if (gBackgroundTexture != nullptr)
-    {
         SDL_RenderCopy(gRenderer, gBackgroundTexture, nullptr, nullptr);
-    }
 
     // Render paddles
     if (gLeftPaddleTexture != nullptr)
-    {
         SDL_RenderCopy(gRenderer, gLeftPaddleTexture, nullptr, &leftPaddle.rect);
-    }
 
     if (gRightPaddleTexture != nullptr)
-    {
         SDL_RenderCopy(gRenderer, gRightPaddleTexture, nullptr, &rightPaddle.rect);
-    }
 
     // Render ball
     if (gBallTexture != nullptr)
-    {
         SDL_RenderCopy(gRenderer, gBallTexture, nullptr, &ball.rect);
-    }
 
     // Render scores
     SDL_Color textColorBlack = {0, 0, 0, 0};
-    stringstream leftScoreText;
-    leftScoreText << leftPaddle.score;
-    renderText(leftScoreText.str(), SCREEN_WIDTH / 4, 25, {0, 0, 255, 255}, gFont36);
+    string leftScoreText = to_string(leftPaddle.score);
+    renderText(leftScoreText, SCREEN_WIDTH / 4, 25, {0, 0, 255, 255}, gFont36);
 
-    stringstream rightScoreText;
-    rightScoreText << rightPaddle.score;
-    renderText(rightScoreText.str(), 3 * SCREEN_WIDTH / 4, 25, {0, 255, 0, 255}, gFont36);
+    string rightScoreText = to_string(rightPaddle.score);
+    renderText(rightScoreText, 3 * SCREEN_WIDTH / 4, 25, {0, 255, 0, 255}, gFont36);
 
     // Render game mode
-    string modeText = (gameMode == PLAYER_VS_PLAYER) ? "Player vs Player" : "Player vs AI";
+    string modeText = (gameMode == PLAYER_VS_PLAYER) ? "Player vs Player" : "Player vs BOT";
     renderText(modeText, SCREEN_WIDTH / 2 - 80, SCREEN_HEIGHT - 20, textColorBlack, gFont24);
 
     // Controls tutorial
@@ -65,9 +55,7 @@ bool PongGame::showMainMenu()
         while (SDL_PollEvent(&e) != 0)
         {
             if (e.type == SDL_QUIT)
-            {
                 quit = true;
-            }
             else if (e.type == SDL_KEYDOWN)
             {
                 switch (e.key.keysym.sym)
@@ -92,19 +80,19 @@ bool PongGame::showMainMenu()
         SDL_RenderClear(gRenderer);
 
         if (gMenuBackTexture != nullptr)
-        {
             SDL_RenderCopy(gRenderer, gMenuBackTexture, nullptr, nullptr);
-        }
 
         // Render menu text
         SDL_Color textColor = {255, 255, 255, 255};
         renderText("PONG GAME", SCREEN_WIDTH / 2 - 100, 150, {255, 100, 255, 255}, gFont36);
         renderText("Press 1. Player vs Player", SCREEN_WIDTH / 2 - 120, 250, textColor, gFont36);
-        renderText("Press 2. Player vs AI", SCREEN_WIDTH / 2 - 120, 300, textColor, gFont36);
+        renderText("Press 2. Player vs BOT", SCREEN_WIDTH / 2 - 120, 300, textColor, gFont36);
         renderText("Press ESC to quit", SCREEN_WIDTH / 2 - 120, 400, textColor, gFont36);
 
         SDL_RenderPresent(gRenderer);
     }
+
+
 
     return modeSelected;
 }
@@ -115,14 +103,14 @@ bool PongGame::showGameOverScreen()
     bool backToMenu = false;
     SDL_Event e;
 
+    Mix_HaltChannel(-1); // Dừng tất cả âm thanh
+
     while (!restartGame && !backToMenu && !quit)
     {
         while (SDL_PollEvent(&e) != 0)
         {
             if (e.type == SDL_QUIT)
-            {
                 quit = true;
-            }
             else if (e.type == SDL_KEYDOWN)
             {
                 switch (e.key.keysym.sym)
@@ -145,9 +133,7 @@ bool PongGame::showGameOverScreen()
         SDL_RenderClear(gRenderer);
 
         if (gMenuBackTexture != nullptr)
-        {
             SDL_RenderCopy(gRenderer, gMenuBackTexture, nullptr, nullptr);
-        }
 
         // Render game over text
         SDL_Color textColor = {255, 255, 255, 255};
@@ -161,16 +147,16 @@ bool PongGame::showGameOverScreen()
         else
         {
             if(leftPaddle.score >= MAX_SCORE)
-                  renderText("YOU WIN!", SCREEN_WIDTH / 2 - 30, 150, {0, 0, 255, 255}, gFont36);
-            else  renderText("YOU LOSE!", SCREEN_WIDTH / 2 - 30, 150, {0, 255, 0, 255}, gFont36);
+                renderText("VICTORY!", SCREEN_WIDTH / 2 - 30, 150, {0, 0, 255, 255}, gFont36);
+            else  renderText("DEFEAT!", SCREEN_WIDTH / 2 - 30, 150, {0, 255, 0, 255}, gFont36);
         }
 
         string scoreText = to_string(leftPaddle.score) + " - " + to_string(rightPaddle.score);
         renderText(scoreText.c_str(), SCREEN_WIDTH / 2 - 30, 200, textColor, gFont36);
 
         renderText("Press R - Restart Game", SCREEN_WIDTH / 2 - 120, 250, textColor, gFont36);
-        renderText("press M - Back to Menu", SCREEN_WIDTH / 2 - 120, 300, textColor, gFont36);
-        renderText("press ESC - Quit", SCREEN_WIDTH / 2 - 120, 350, textColor, gFont36);
+        renderText("Press M - Back to Menu", SCREEN_WIDTH / 2 - 120, 300, textColor, gFont36);
+        renderText("Press ESC - Quit", SCREEN_WIDTH / 2 - 120, 350, textColor, gFont36);
 
         SDL_RenderPresent(gRenderer);
     }
