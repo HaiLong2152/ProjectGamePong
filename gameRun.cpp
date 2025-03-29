@@ -17,26 +17,22 @@ void PongGame::run()
         0
     };
 
-
-
     // Show the main menu first
     if (!showMainMenu())
-    {
         return;
-    }
 
     SDL_Event e;
     bool continueGame = true;
+
     resetBall((rand() % 2 == 0) ? 1 : -1);
+
     while (continueGame && !quit)
     {
         // Handle events
         while (SDL_PollEvent(&e) != 0)
         {
             if (e.type == SDL_QUIT)
-            {
                 quit = true;
-            }
             else if (e.type == SDL_KEYDOWN && e.key.repeat == 0)
             {
                 switch (e.key.keysym.sym)
@@ -52,15 +48,11 @@ void PongGame::run()
                 // Right paddle controls (only for player vs player mode)
                 case SDLK_UP:
                     if (gameMode == PLAYER_VS_PLAYER)
-                    {
                         rightPaddle.speed = -PADDLE_SPEED;
-                    }
                     break;
                 case SDLK_DOWN:
                     if (gameMode == PLAYER_VS_PLAYER)
-                    {
                         rightPaddle.speed = +PADDLE_SPEED;
-                    }
                     break;
 
                 case SDLK_ESCAPE:
@@ -81,15 +73,11 @@ void PongGame::run()
                 // Right paddle controls
                 case SDLK_UP:
                     if (gameMode == PLAYER_VS_PLAYER)
-                    {
                         rightPaddle.speed = 0;
-                    }
                     break;
                 case SDLK_DOWN:
                     if (gameMode == PLAYER_VS_PLAYER)
-                    {
                         rightPaddle.speed = 0;
-                    }
                     break;
                 }
             }
@@ -99,25 +87,18 @@ void PongGame::run()
         updatePaddle(leftPaddle);
 
         if (gameMode == PLAYER_VS_PLAYER)
-        {
             updatePaddle(rightPaddle);
-        }
         else
-        {
             updateAI();
-        }
 
         updateBall();
 
-
         if ((leftPaddle.score >= MAX_SCORE || rightPaddle.score >= MAX_SCORE)
-            && abs(leftPaddle.score - rightPaddle.score) >=2 )
-        {
+                && abs(leftPaddle.score - rightPaddle.score) >=2 )
             continueGame = showGameOverScreen();
-        }
 
         renderGame();
 
-        SDL_Delay(11);
+        SDL_Delay(12);
     }
 }
