@@ -6,45 +6,33 @@ void PongGame::updatePaddle(Paddle &paddle)
     paddle.rect.y += paddle.speed;
 
     // Limit movement
-    if (paddle.rect.y < 24)
-    {
-        paddle.rect.y = 24;
-    }
-    else if (paddle.rect.y > SCREEN_HEIGHT - 24 - paddle.rect.h)
-    {
-        paddle.rect.y = SCREEN_HEIGHT - 24 - paddle.rect.h;
-    }
+    if (paddle.rect.y < BORDER)
+        paddle.rect.y = BORDER;
+    else if (paddle.rect.y > SCREEN_HEIGHT - BORDER - paddle.rect.h)
+        paddle.rect.y = SCREEN_HEIGHT - BORDER - paddle.rect.h;
 }
 
 void PongGame::updateAI()
 {
-    int AI_DIFFICUTY = 10;
+    int AI_DIFFICUTY = 8;
     int paddleCenter = rightPaddle.rect.y + rightPaddle.rect.h / 2;
     int ballCenter = ball.rect.y + ball.rect.h / 2;
     int moveSpeed = AI_SPEED - (rand() % 4);
 
     // Only move if the ball is moving towards and half screen
-    if (ball.speedX > 0 && ball.rect.x > SCREEN_WIDTH / 2 - 20)
+    if (ball.speedX > 0 && ball.rect.x > SCREEN_WIDTH / 2)
     {
         // Add some difficulty by limiting AI reaction
         if (paddleCenter < ballCenter - AI_DIFFICUTY)
-        {
             rightPaddle.rect.y += moveSpeed;
-        }
         else if (paddleCenter > ballCenter + AI_DIFFICUTY)
-        {
             rightPaddle.rect.y -= moveSpeed;
-        }
 
         // Limit movement
-        if (rightPaddle.rect.y < 23)
-        {
-            rightPaddle.rect.y = 23;
-        }
-        else if (rightPaddle.rect.y > SCREEN_HEIGHT - 23 - rightPaddle.rect.h)
-        {
-            rightPaddle.rect.y = SCREEN_HEIGHT - 23 - rightPaddle.rect.h;
-        }
+        if (rightPaddle.rect.y < BORDER)
+            rightPaddle.rect.y = BORDER;
+        else if (rightPaddle.rect.y > SCREEN_HEIGHT - BORDER - rightPaddle.rect.h)
+            rightPaddle.rect.y = SCREEN_HEIGHT - BORDER - rightPaddle.rect.h;
     }
 }
 
@@ -66,7 +54,6 @@ void PongGame::resetBall(int Direct)
         Mix_Volume(-1, 18);
         Mix_PlayChannel(-1, gCountdownSound, 0); // Phát âm thanh 1 lần
     }
-
     // Ngay lập tức đặt tốc độ bóng về 0
     ball.speedX = 0;
     ball.speedY = 0;
@@ -83,11 +70,10 @@ void PongGame::updateBall()
 
             // Sử dụng hướng đã lưu
             ball.speedX = ballResetDirection > 0 ? BALL_MIN_SPEED : -BALL_MIN_SPEED;
-            ball.speedY = (rand() % (2*BALL_MIN_SPEED)) - BALL_MIN_SPEED ;
+            ball.speedY = (rand() % (2*BALL_MIN_SPEED)) - BALL_MIN_SPEED;
         }
         else
         {
-
 
             // Trong thời gian chờ, giữ bóng ở vị trí giữa và không di chuyển
             ball.speedX = 0;
@@ -100,9 +86,9 @@ void PongGame::updateBall()
     ball.rect.y += ball.speedY;
 
     //  impact with top
-    if (ball.rect.y <= 23)
+    if (ball.rect.y <= BORDER)
     {
-        ball.rect.y = 23;
+        ball.rect.y = BORDER;
         ball.speedY = -ball.speedY + (rand() % 3 - 1);
         ball.speedX =  ball.speedX + (rand() % 3 - 1);
 
@@ -113,9 +99,9 @@ void PongGame::updateBall()
         if (abs(ball.speedX) > BALL_MAX_SPEED) ball.speedX = ((ball.speedX > 0) ? 1 : -1) * BALL_MAX_SPEED;
     }
     //  impact with bottom
-    else if (ball.rect.y + ball.rect.h >= SCREEN_HEIGHT - 23)
+    else if (ball.rect.y + ball.rect.h >= SCREEN_HEIGHT - BORDER)
     {
-        ball.rect.y = SCREEN_HEIGHT - ball.rect.h - 23;
+        ball.rect.y = SCREEN_HEIGHT - ball.rect.h - BORDER;
         ball.speedY = -ball.speedY + (rand() % 3 - 1);
         ball.speedX =  ball.speedX + (rand() % 3 - 1);
 
@@ -146,7 +132,7 @@ void PongGame::updateBall()
         }
     }
 
-// impact with right paddle
+    // impact with right paddle
     if (ball.speedX > 0 &&
             ball.rect.x + ball.rect.w > rightPaddle.rect.x &&
             ball.rect.x < rightPaddle.rect.x &&
