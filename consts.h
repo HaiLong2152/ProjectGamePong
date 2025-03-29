@@ -4,7 +4,7 @@
 // Screen
 const int SCREEN_WIDTH = 1200;
 const int SCREEN_HEIGHT = 635;
-
+const int BORDER = 24;
 // Objects
 const int PADDLE_WIDTH = 30;
 const int PADDLE_HEIGHT = 100;
