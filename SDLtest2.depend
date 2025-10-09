@@ -1,0 +1,57 @@
+# depslib dependency file v1.0
+1743129808 source:d:\sdltest2\pong.cpp
+	"gamePong.h"
+
+1741778170 d:\sdltest2\game.h
+	<SDL.h>
+	<SDL_image.h>
+	<SDL_ttf.h>
+	<SDL_mixer.h>
+	<iostream>
+	<string>
+	<sstream>
+	<cstdlib>
+	<ctime>
+
+1743243583 source:d:\sdltest2\gamepong.cpp
+	"gamePong.h"
+
+1743243486 d:\sdltest2\gamepong.h
+	<SDL.h>
+	<SDL_image.h>
+	<SDL_ttf.h>
+	<SDL_mixer.h>
+	<iostream>
+	<string>
+	<cmath>
+	<cstdlib>
+	"consts.h"
+	"gameStructs.h"
+
+1741789028 source:d:\sdltest2\gamepong1.cpp
+	"gamePong.h"
+
+1584205420 source:d:\sdltest2\main.cpp
+	<iostream>
+
+1743250735 d:\sdltest2\consts.h
+
+1743129823 d:\sdltest2\gamestructs.h
+
+1743779873 source:d:\sdltest2\gamegameplay.cpp
+	"gamePong.h"
+
+1743251027 source:d:\sdltest2\gamemedia.cpp
+	"gamePong.h"
+
+1743779727 source:d:\sdltest2\gamerender.cpp
+	"gamePong.h"
+
+1743779984 source:d:\sdltest2\gamerun.cpp
+	"gamePong.h"
+
+1744381161 source:d:\sdltest2\testdev.cpp
+	<iostream>
+	<vector>
+	<queue>
+

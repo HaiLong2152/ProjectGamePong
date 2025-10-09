@@ -14,9 +14,11 @@ void PongGame::updatePaddle(Paddle &paddle)
 
 void PongGame::updateAI()
 {
-    int AI_DIFFICUTY = 8;
+    // Distance between ball and BOT
+    int AI_DIFFICUTY = 7;
     int paddleCenter = rightPaddle.rect.y + rightPaddle.rect.h / 2;
     int ballCenter = ball.rect.y + ball.rect.h / 2;
+    // Make movement less predictable
     int moveSpeed = AI_SPEED - (rand() % 4);
 
     // Only move if the ball is moving towards and half screen
@@ -74,7 +76,6 @@ void PongGame::updateBall()
         }
         else
         {
-
             // Trong thời gian chờ, giữ bóng ở vị trí giữa và không di chuyển
             ball.speedX = 0;
             ball.speedY = 0;

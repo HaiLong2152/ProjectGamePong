@@ -47,16 +47,16 @@ void PongGame::renderGame()
 
 bool PongGame::showMainMenu()
 {
-    bool modeSelected = false;
+    bool modeSelected = false; // Chosen a game mode
     SDL_Event e;
 
     while (!modeSelected && !quit)
     {
-        while (SDL_PollEvent(&e) != 0)
+        while (SDL_PollEvent(&e) != 0) // Window close button
         {
             if (e.type == SDL_QUIT)
                 quit = true;
-            else if (e.type == SDL_KEYDOWN)
+            else if (e.type == SDL_KEYDOWN) // Keyboard input
             {
                 switch (e.key.keysym.sym)
                 {
@@ -91,9 +91,6 @@ bool PongGame::showMainMenu()
 
         SDL_RenderPresent(gRenderer);
     }
-
-
-
     return modeSelected;
 }
 
@@ -178,6 +175,6 @@ bool PongGame::showGameOverScreen()
         rightPaddle.score = 0;
         return showMainMenu();
     }
-
+    //if player chose to quit
     return false;
 }

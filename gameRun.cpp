@@ -22,7 +22,7 @@ void PongGame::run()
         return;
 
     SDL_Event e;
-    bool continueGame = true;
+    bool continueGame = true; // control main game loop
 
     resetBall((rand() % 2 == 0) ? 1 : -1);
 
@@ -93,9 +93,10 @@ void PongGame::run()
 
         updateBall();
 
+        //End screen
         if ((leftPaddle.score >= MAX_SCORE || rightPaddle.score >= MAX_SCORE)
                 && abs(leftPaddle.score - rightPaddle.score) >=2 )
-            continueGame = showGameOverScreen();
+            continueGame = showGameOverScreen(); //Show game over screen and get player's next choice
 
         renderGame();
 

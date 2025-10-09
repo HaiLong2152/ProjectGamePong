@@ -6,7 +6,7 @@ int main(int argc, char* args[])
 
     if (!game.initialize())
     {
-        std::cout << "Failed to initialize game!" << std::endl;
+        cout << "Failed to initialize game!" << endl;
         return -1;
     }
 

@@ -124,12 +124,6 @@ bool PongGame::loadMedia()
         success = false;
     }
 
-    //gScoreSound = Mix_LoadWAV("score.wav");
-    // if (gScoreSound == nullptr)
-    // {
-    //    cout << "Failed to load score sound effect! SDL_mixer Error: " << Mix_GetError() << endl;
-    //}
-
     return success;
 }
 

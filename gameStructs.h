@@ -1,8 +1,6 @@
 #ifndef GAMESTRUCTS_H
 #define GAMESTRUCTS_H
 
-#include <SDL.h>
-
 enum GameMode
 {
     PLAYER_VS_PLAYER,

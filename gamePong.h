@@ -8,9 +8,8 @@
 #include <iostream>
 #include <string>
 #include <cmath>
-#include <sstream>
 #include <cstdlib>
-#include <ctime>
+
 
 #include "consts.h"
 #include "gameStructs.h"
@@ -25,7 +24,6 @@ private:
     SDL_Renderer* gRenderer;
     TTF_Font* gFont24;
     TTF_Font* gFont36;
-
     SDL_Texture* gBackgroundTexture;
     SDL_Texture* gMenuBackTexture;
     SDL_Texture* gLeftPaddleTexture;
@@ -34,14 +32,17 @@ private:
     Mix_Chunk* gHitSound;
     Mix_Chunk* gScoreSound;
     Mix_Chunk* gCountdownSound;
+
     GameMode gameMode;
     Paddle leftPaddle;
     Paddle rightPaddle;
     Ball ball;
     bool quit;
+
     Uint32 ballResetTime;
     bool isBallWaiting;
     int ballResetDirection;
+
     bool init();
     bool loadMedia();
     void close();
