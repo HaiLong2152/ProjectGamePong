@@ -16,6 +16,7 @@ PongGame::PongGame() :
     gameMode(PLAYER_VS_PLAYER),
     quit(false),
     ballResetTime(0),
+    isPaused(false),
     isBallWaiting(false),
     ballResetDirection(0)
 

@@ -87,6 +87,28 @@ void PongGame::renderGame()
         }
     }
 
+     // Render pause text
+    if (isPaused)
+    {
+        // Render nền bán trong suốt cho "Paused"
+        SDL_Surface* pauseSurface = TTF_RenderText_Solid(gFont36, "Paused", {255, 255, 255, 255});
+        if (pauseSurface != nullptr)
+        {
+            int width = pauseSurface->w;
+            int height = pauseSurface->h;
+            SDL_Rect bgQuad = { SCREEN_WIDTH / 2 - width / 2 - 2, SCREEN_HEIGHT / 2 - height / 2 - 2, width + 4, height + 4 }; // Nền vừa phải
+            SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_BLEND);
+            SDL_SetRenderDrawColor(gRenderer, 100, 100, 100, 120);
+            SDL_RenderFillRect(gRenderer, &bgQuad);
+            SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_NONE);
+            SDL_FreeSurface(pauseSurface);
+        }
+
+        // Render text "Paused"
+        SDL_Color pauseColor = {255, 255, 255, 255};
+        renderText("Paused", SCREEN_WIDTH / 2 - 50, SCREEN_HEIGHT / 2 - 20, pauseColor, gFont36);
+    }
+
     // Update screen
     SDL_RenderPresent(gRenderer);
 }
@@ -134,6 +156,7 @@ bool PongGame::showMainMenu()
         renderText("Press 1. Player vs Player", SCREEN_WIDTH / 2 - 120, 250, textColor, gFont36);
         renderText("Press 2. Player vs BOT", SCREEN_WIDTH / 2 - 120, 300, textColor, gFont36);
         renderText("Press ESC to quit", SCREEN_WIDTH / 2 - 120, 400, textColor, gFont36);
+        renderText("Press P to pause", SCREEN_WIDTH / 2 - 120, 500, textColor, gFont36);
 
         SDL_RenderPresent(gRenderer);
     }

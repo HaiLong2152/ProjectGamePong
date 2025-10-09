@@ -40,6 +40,7 @@ private:
     bool quit;
 
     Uint32 ballResetTime;
+    bool isPaused;
     bool isBallWaiting;
     int ballResetDirection;
 
