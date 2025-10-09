@@ -41,6 +41,52 @@ void PongGame::renderGame()
     }
     else renderText("W/S", 70, SCREEN_HEIGHT - 20, textColorBlack, gFont24);
 
+    // Render countdown effect
+    if (isBallWaiting)
+    {
+        Uint32 timeLeft = ballResetTime - SDL_GetTicks();
+        int countdownNumber = timeLeft / 1000 + 1;  // Đếm từ 3, 2, 1
+        if (countdownNumber > 0 && countdownNumber <= 3)
+        {
+            string countdownText = to_string(countdownNumber);
+            // Tính toán scale dựa trên thời gian để tạo hiệu ứng phóng to
+            float scale = 1.0f + 0.5f * (1.0f - (timeLeft % 1000) / 1000.0f);  // Phóng to từ 1x đến 1.5x
+
+            int alpha = (timeLeft % 1000 < 500) ? 255 : 0;  // Bật 0.5s, tắt 0.5s mỗi giây
+
+            // Render hình vuông nền bán trong suốt
+            SDL_Surface* textSurface = TTF_RenderText_Solid(gFont36, countdownText.c_str(), {255, 255, 0, (Uint8)alpha});
+            if (textSurface != nullptr)
+            {
+                int width = textSurface->w * scale;
+                int height = textSurface->h * scale;
+                SDL_Rect bgQuad = { SCREEN_WIDTH / 2 - width / 2 - 2, SCREEN_HEIGHT / 2 - height / 2 - 32, width + 4, height + 4 }; // Nền vừa phải, y dịch lên 30px
+                SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_BLEND);
+                SDL_SetRenderDrawColor(gRenderer, 100, 100, 100, 100);
+                SDL_RenderFillRect(gRenderer, &bgQuad);
+                SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_NONE);
+                SDL_FreeSurface(textSurface);
+            }
+
+            // Render text chính với màu vàng sáng
+            SDL_Color textColor = {255, 255, 0, (Uint8)alpha};  // Màu vàng sáng
+            textSurface = TTF_RenderText_Solid(gFont36, countdownText.c_str(), textColor);
+            if (textSurface != nullptr)
+            {
+                SDL_Texture* textTexture = SDL_CreateTextureFromSurface(gRenderer, textSurface);
+                if (textTexture != nullptr)
+                {
+                    int width = textSurface->w * scale;
+                    int height = textSurface->h * scale;
+                    SDL_Rect renderQuad = { SCREEN_WIDTH / 2 - width / 2, SCREEN_HEIGHT / 2 - height / 2 - 30, width, height }; // Trung tâm sân, y dịch lên 30px
+                    SDL_RenderCopy(gRenderer, textTexture, nullptr, &renderQuad);
+                    SDL_DestroyTexture(textTexture);
+                }
+                SDL_FreeSurface(textSurface);
+            }
+        }
+    }
+
     // Update screen
     SDL_RenderPresent(gRenderer);
 }
