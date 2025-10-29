@@ -20,4 +20,6 @@ const int AI_SPEED = 10;
 const int MAX_SCORE = 10;
 
 const Uint32 BALL_WAIT_TIME = 3000;
+
+const int TRAIL_LENGTH = 3;
 #endif // CONSTS_H

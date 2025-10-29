@@ -18,6 +18,15 @@ void PongGame::renderGame()
         SDL_RenderCopy(gRenderer, gRightPaddleTexture, nullptr, &rightPaddle.rect);
 
     // Render ball
+    for (size_t i = 0; i < ballTrail.size(); ++i)
+    {
+        // Độ trong suốt: vệt cũ càng mờ
+        Uint8 alpha = 150 * (TRAIL_LENGTH - i) / (TRAIL_LENGTH + 2);
+        SDL_SetTextureAlphaMod(gBallTexture, alpha);
+        SDL_RenderCopy(gRenderer, gBallTexture, nullptr, &ballTrail[i]);
+    }
+
+    SDL_SetTextureAlphaMod(gBallTexture, 255);
     if (gBallTexture != nullptr)
         SDL_RenderCopy(gRenderer, gBallTexture, nullptr, &ball.rect);
 
@@ -87,7 +96,7 @@ void PongGame::renderGame()
         }
     }
 
-     // Render pause text
+    // Render pause text
     if (isPaused)
     {
         // Render nền bán trong suốt cho "Paused"

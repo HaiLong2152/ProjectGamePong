@@ -51,6 +51,8 @@ void PongGame::resetBall(int Direct)
     ballResetTime = SDL_GetTicks() + BALL_WAIT_TIME;
     isBallWaiting = true;
 
+    ballTrail.clear();
+
     if (gCountdownSound !=nullptr)
     {
         Mix_Volume(-1, 18);
@@ -107,6 +109,20 @@ void PongGame::updateBall()
         // Move ball
         ball.rect.x += ball.speedX;
         ball.rect.y += ball.speedY;
+
+        if (isPaused || isBallWaiting)
+        {
+            ballTrail.clear();  // Xóa sạch trail
+            return;  // Không thêm trail mới
+        }
+
+        if (!isBallWaiting && !isPaused && (ball.speedX != 0 || ball.speedY != 0))
+        {
+            ballTrail.push_front(ball.rect);  // Thêm vị trí hiện tại vào đầu
+            //cout << "Trail size: " << ballTrail.size() << endl;
+            if (ballTrail.size() > TRAIL_LENGTH)
+                ballTrail.pop_back();
+        }
 
         //  impact with top
         if (ball.rect.y <= BORDER)

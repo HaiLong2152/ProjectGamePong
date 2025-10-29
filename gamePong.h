@@ -9,6 +9,7 @@
 #include <string>
 #include <cmath>
 #include <cstdlib>
+#include <deque>
 
 
 #include "consts.h"
@@ -43,6 +44,16 @@ private:
     bool isPaused;
     bool isBallWaiting;
     int ballResetDirection;
+
+    int hitCount = 0;
+    string player1Name = "Player 1";
+    string player2Name = "Player 2";
+    bool isEnteringName = false;
+    bool isPlayer1Name = true;
+    // Trong phần private của class PongGame
+    deque<SDL_Rect> ballTrail;
+
+
 
     bool init();
     bool loadMedia();
