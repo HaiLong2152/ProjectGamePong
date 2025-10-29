@@ -45,16 +45,21 @@ private:
     bool isBallWaiting;
     int ballResetDirection;
 
-    int hitCount = 0;
-    string player1Name = "Player 1";
-    string player2Name = "Player 2";
-    bool isEnteringName = false;
-    bool isPlayer1Name = true;
-    // Trong phần private của class PongGame
+    string player1Name;
+    string player2Name;
+
+    // Trạng thái nhập tên
+    bool isEnteringName;
+    bool isPlayer1Turn;  // true = đang nhập P1, false = P2
+    string currentInput; // Chuỗi đang gõ
+
     deque<SDL_Rect> ballTrail;
-
-
-
+    int maxScore;
+    bool isMatchPoint;
+    int matchPointPlayer;        // 1=left, 2=right
+    bool isMatchPointPause;  // Dừng game khi match point
+    Uint32 matchPointPauseTime;  // Thời gian bắt đầu pause
+    const Uint32 MATCH_POINT_PAUSE = 1500;
     bool init();
     bool loadMedia();
     void close();
@@ -69,6 +74,8 @@ private:
 
     bool showMainMenu();
     bool showGameOverScreen();
+    bool showNameEntryScreen();
+    bool showConfigScreen();
 
 public:
     PongGame();

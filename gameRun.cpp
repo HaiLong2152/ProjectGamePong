@@ -17,7 +17,13 @@ void PongGame::run()
         0
     };
 
-    // Show the main menu first
+    // Show nhập tên trước
+    if (!showNameEntryScreen())
+        return;
+
+    if (!showConfigScreen())
+        return;
+    // Show the main menu
     if (!showMainMenu())
         return;
 
@@ -94,7 +100,7 @@ void PongGame::run()
         updateBall();
 
         //End screen
-        if ((leftPaddle.score >= MAX_SCORE || rightPaddle.score >= MAX_SCORE)
+        if ((leftPaddle.score >= maxScore || rightPaddle.score >= maxScore)
                 && abs(leftPaddle.score - rightPaddle.score) >=2 )
             continueGame = showGameOverScreen(); //Show game over screen and get player's next choice
 
@@ -102,4 +108,5 @@ void PongGame::run()
 
         SDL_Delay(12);
     }
+    close();
 }

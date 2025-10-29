@@ -18,14 +18,26 @@ PongGame::PongGame() :
     ballResetTime(0),
     isPaused(false),
     isBallWaiting(false),
-    ballResetDirection(0)
+    ballResetDirection(0),
+
+    player1Name("Player 1"),
+    player2Name("Player 2"),
+    isEnteringName(true),
+    isPlayer1Turn(true),
+    currentInput(""),
+
+
+    maxScore(10),
+    isMatchPointPause(false),
+    matchPointPauseTime(0),
+    isMatchPoint(false),
+    matchPointPlayer(0)
 
 {
 }
 
 PongGame::~PongGame()
 {
-    close();
 }
 
 bool PongGame::initialize()

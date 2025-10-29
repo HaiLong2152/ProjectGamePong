@@ -66,6 +66,7 @@ void PongGame::resetBall(int Direct)
 void PongGame::updateBall()
 {
     // Xử lý phím tạm dừng
+
     static bool pauseKeyPressed = false;
     const Uint8* currentKeyStates = SDL_GetKeyboardState(NULL);
     if (currentKeyStates[SDL_SCANCODE_P])
@@ -83,6 +84,19 @@ void PongGame::updateBall()
     else
         pauseKeyPressed = false;
 
+    if (isMatchPointPause)
+    {
+        if (SDL_GetTicks() - matchPointPauseTime >= MATCH_POINT_PAUSE)
+        {
+            isMatchPointPause = false;
+            isMatchPoint = false;      // TẮT NHÁY
+            matchPointPlayer = 0;
+            if(rightPaddle.score > leftPaddle.score) resetBall(1);
+            else if(rightPaddle.score < leftPaddle.score) resetBall(-1);
+            else resetBall((rand() % 2 == 0) ? 1 : -1);
+        }
+        return;  // KHÔNG UPDATE BÓNG/TRẠNG THÁI
+    }
     // Chỉ cập nhật khi không tạm dừng
     if (!isPaused)
     {
@@ -105,6 +119,8 @@ void PongGame::updateBall()
                 ball.speedY = 0;
             }
         }
+
+
 
         // Move ball
         ball.rect.x += ball.speedX;
@@ -198,18 +214,40 @@ void PongGame::updateBall()
             rightPaddle.score++;
 
             //SDL_Delay(100);
-            if(rightPaddle.score > leftPaddle.score) resetBall(1);
-            else if(rightPaddle.score < leftPaddle.score) resetBall(-1);
-            else resetBall((rand() % 2 == 0) ? 1 : -1);
+            if (rightPaddle.score == maxScore - 1 && leftPaddle.score < maxScore - 1)
+            {
+                // MATCH POINT PHẢI - DỪNG GAME 1.5s
+                matchPointPlayer = 2;
+                isMatchPointPause = true;
+                matchPointPauseTime = SDL_GetTicks();
+                isMatchPoint = true;
+            }
+            else
+            {
+                if(rightPaddle.score > leftPaddle.score) resetBall(1);
+                else if(rightPaddle.score < leftPaddle.score) resetBall(-1);
+                else resetBall((rand() % 2 == 0) ? 1 : -1);
+            }
         }
         else if (ball.rect.x > SCREEN_WIDTH)
         {
             // Left player scores
             leftPaddle.score++;
             //SDL_Delay(100);
-            if(rightPaddle.score > leftPaddle.score) resetBall(1);
-            else if(rightPaddle.score < leftPaddle.score) resetBall(-1);
-            else resetBall((rand() % 2 == 0) ? 1 : -1);
+            if (leftPaddle.score == maxScore - 1 && rightPaddle.score < maxScore - 1)
+            {
+                // MATCH POINT PHẢI - DỪNG GAME 1.5s
+                matchPointPlayer = 1;
+                isMatchPointPause = true;
+                matchPointPauseTime = SDL_GetTicks();
+                isMatchPoint = true;
+            }
+            else
+            {
+                if(rightPaddle.score > leftPaddle.score) resetBall(1);
+                else if(rightPaddle.score < leftPaddle.score) resetBall(-1);
+                else resetBall((rand() % 2 == 0) ? 1 : -1);
+            }
         }
 
     }
