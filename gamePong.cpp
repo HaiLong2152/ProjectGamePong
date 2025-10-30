@@ -34,10 +34,10 @@ PongGame::PongGame() :
     matchPointPlayer(0),
 
     gameStartTime(0),
-leftHits(0),
-rightHits(0),
-currentRally(0),
-longestRally(0)
+    leftHits(0),
+    rightHits(0),
+    currentRally(0),
+    longestRally(0)
 
 {
 }

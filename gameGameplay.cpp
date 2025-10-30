@@ -92,8 +92,6 @@ void PongGame::updateBall()
         if (SDL_GetTicks() - matchPointPauseTime >= MATCH_POINT_PAUSE)
         {
             isMatchPointPause = false;
-            isMatchPoint = false;      // TẮT NHÁY
-            matchPointPlayer = 0;
             if(rightPaddle.score > leftPaddle.score) resetBall(1);
             else if(rightPaddle.score < leftPaddle.score) resetBall(-1);
             else resetBall((rand() % 2 == 0) ? 1 : -1);
@@ -227,8 +225,8 @@ void PongGame::updateBall()
             rightPaddle.score++;
             currentRally=0;
 
-            //SDL_Delay(100);
-            if (rightPaddle.score == maxScore - 1 && leftPaddle.score < maxScore - 1)
+            if ((rightPaddle.score == maxScore - 1 && leftPaddle.score < maxScore - 1) ||
+                    (rightPaddle.score >= maxScore - 1 && rightPaddle.score - leftPaddle.score == 1))
             {
                 // MATCH POINT PHẢI - DỪNG GAME 1.5s
                 matchPointPlayer = 2;
@@ -238,6 +236,11 @@ void PongGame::updateBall()
             }
             else
             {
+                if(isMatchPoint && (matchPointPlayer == 2 || matchPointPlayer == 1) && leftPaddle.score == rightPaddle.score)
+                {
+                    isMatchPoint = false;
+                    matchPointPlayer = 0;
+                }
                 if(rightPaddle.score > leftPaddle.score) resetBall(1);
                 else if(rightPaddle.score < leftPaddle.score) resetBall(-1);
                 else resetBall((rand() % 2 == 0) ? 1 : -1);
@@ -249,8 +252,8 @@ void PongGame::updateBall()
             leftPaddle.score++;
             currentRally=0;
 
-            //SDL_Delay(100);
-            if (leftPaddle.score == maxScore - 1 && rightPaddle.score < maxScore - 1)
+            if ((leftPaddle.score == maxScore - 1 && rightPaddle.score < maxScore - 1) ||
+                    (leftPaddle.score >= maxScore - 1 && leftPaddle.score - rightPaddle.score == 1))
             {
                 // MATCH POINT PHẢI - DỪNG GAME 1.5s
                 matchPointPlayer = 1;
@@ -260,11 +263,17 @@ void PongGame::updateBall()
             }
             else
             {
+                if(isMatchPoint && (matchPointPlayer == 1 || matchPointPlayer == 2) && leftPaddle.score == rightPaddle.score)
+                {
+                    isMatchPoint = false;
+                    matchPointPlayer = 0;
+                }
                 if(rightPaddle.score > leftPaddle.score) resetBall(1);
                 else if(rightPaddle.score < leftPaddle.score) resetBall(-1);
                 else resetBall((rand() % 2 == 0) ? 1 : -1);
             }
         }
+
 
     }
 }

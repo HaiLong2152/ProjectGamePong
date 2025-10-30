@@ -31,25 +31,21 @@ void PongGame::renderGame()
         SDL_RenderCopy(gRenderer, gBallTexture, nullptr, &ball.rect);
     // Thong bao MatchPoint
 
-    if (isMatchPoint)
+    if (isMatchPointPause)
     {
         bool flashOn = (SDL_GetTicks() / 150) % 2 == 0;
-
         if (flashOn)
         {
             SDL_Color flashColor = (matchPointPlayer == 1) ?
                                    SDL_Color{0, 191, 255, 255} :
                                    SDL_Color{50, 205, 50, 255};
-
             string MatchPointplayerName = (matchPointPlayer == 1) ? player1Name :
                                           (gameMode == PLAYER_VS_AI ? "BOT" : player2Name);
-
             // TEXT TO, ĐẬM, GIỮA MÀN HÌNH
             renderText(to_string(abs(leftPaddle.score-rightPaddle.score)) + " MATCH POINT for " + MatchPointplayerName,
                        SCREEN_WIDTH / 2 - 180,
                        SCREEN_HEIGHT / 2 - 80,
                        flashColor, gFont36);
-
             SDL_SetRenderDrawColor(gRenderer, flashColor.r, flashColor.g, flashColor.b, 200);
             int offset = (SDL_GetTicks() / 100) % 4 - 2;
             SDL_Rect glow =
@@ -61,6 +57,46 @@ void PongGame::renderGame()
             SDL_RenderDrawRect(gRenderer, &glow);
             SDL_RenderDrawRect(gRenderer, &glow);
             SDL_RenderDrawRect(gRenderer, &glow);
+        }
+    }
+    if (isMatchPoint){
+        // HIỆU ỨNG Ở ĐIỂM SỐ CỦA PLAYER CÓ MATCH POINT
+        SDL_Color flashColor = (matchPointPlayer == 1) ?
+                           SDL_Color{0, 191, 255, 255} :
+                           SDL_Color{50, 205, 50, 255};
+        if (matchPointPlayer == 1)  // Player trái
+        {
+            // Vòng tròn phát sáng quanh điểm số trái
+            int pulseSize = 40 + (SDL_GetTicks() / 50) % 20;  // Nhấp nháy từ 40-60
+            SDL_SetRenderDrawColor(gRenderer, flashColor.r, flashColor.g, flashColor.b, 150);
+            for (int i = 0; i < 3; i++)
+            {
+                SDL_Rect scoreGlow =
+                {
+                    SCREEN_WIDTH / 4 - pulseSize / 2 + i * 2,
+                    50 - pulseSize / 2 + i * 2,
+                    pulseSize - i * 4,
+                    pulseSize - i * 4
+                };
+                SDL_RenderDrawRect(gRenderer, &scoreGlow);
+            }
+        }
+        else if (matchPointPlayer == 2)  // Player phải
+        {
+            // Vòng tròn phát sáng quanh điểm số phải
+            int pulseSize = 40 + (SDL_GetTicks() / 50) % 20;  // Nhấp nháy từ 40-60
+            SDL_SetRenderDrawColor(gRenderer, flashColor.r, flashColor.g, flashColor.b, 150);
+            for (int i = 0; i < 3; i++)
+            {
+                SDL_Rect scoreGlow =
+                {
+                    3 * SCREEN_WIDTH / 4 - pulseSize / 2 + i * 2,
+                    50 - pulseSize / 2 + i * 2,
+                    pulseSize - i * 4,
+                    pulseSize - i * 4
+                };
+                SDL_RenderDrawRect(gRenderer, &scoreGlow);
+            }
         }
     }
 
@@ -207,9 +243,11 @@ bool PongGame::showNameEntryScreen()
                             errorMsg = "Ten khong duoc trung voi P1\n Vui long nhap ten khac.";
                             input = "";  // Xóa để nhập lại
                         }
-                        else {
-                        player2Name = input;
-                        done = true;}
+                        else
+                        {
+                            player2Name = input;
+                            done = true;
+                        }
                     }
                 }
                 else if (e.key.keysym.sym == SDLK_BACKSPACE && !input.empty())
@@ -231,7 +269,7 @@ bool PongGame::showNameEntryScreen()
 
         renderText(p1, SCREEN_WIDTH / 2 - 120, 200, {255, 255, 255, 255}, gFont24);
         renderText(p2, SCREEN_WIDTH / 2 - 120, 250, {255, 255, 255, 255}, gFont24);
-       if (!errorMsg.empty())
+        if (!errorMsg.empty())
         {
             renderText(errorMsg, SCREEN_WIDTH / 2 - 180, 320, {255, 100, 100, 255}, gFont24);
             // Tự động xóa sau 2 giây
@@ -393,18 +431,20 @@ bool PongGame::showGameOverScreen()
     string p2Name = (gameMode == PLAYER_VS_AI ? "BOT" : player2Name);
 
     string winner;
-SDL_Color winColor;
+    SDL_Color winColor;
 
-if (gameMode == PLAYER_VS_AI)
-{
-    winner = (isP1Win) ? "VICTORY!" : "DEFEAT!";
-    winColor = (isP1Win) ? SDL_Color{0, 255, 0, 255} : SDL_Color{255, 0, 0, 255};
-}
-else
-{
-    winner = (isP1Win) ? player1Name + " WINS!" : player2Name + " WINS!";
-    winColor = (isP1Win) ? SDL_Color{0, 191, 255, 255} : SDL_Color{50, 205, 50, 255};
-}
+    if (gameMode == PLAYER_VS_AI)
+    {
+        winner = (isP1Win) ? "VICTORY!" : "DEFEAT!";
+        winColor = (isP1Win) ? SDL_Color{0, 255, 0, 255} :
+                   SDL_Color{255, 0, 0, 255};
+    }
+    else
+    {
+        winner = (isP1Win) ? player1Name + " WINS!" : player2Name + " WINS!";
+        winColor = (isP1Win) ? SDL_Color{0, 191, 255, 255} :
+                   SDL_Color{50, 205, 50, 255};
+    }
 
     SDL_Event e;
 
@@ -436,7 +476,7 @@ else
         SDL_RenderClear(gRenderer);
         if (gMenuBackTexture != nullptr)
             SDL_RenderCopy(gRenderer, gMenuBackTexture, nullptr, nullptr);
-        renderText(winner, SCREEN_WIDTH / 2 - 100, 80, winColor, gFont36);
+        renderText(winner, SCREEN_WIDTH / 2 - 60, 80, winColor, gFont36);
 
         // Tỉ số
         string scoreText = to_string(leftPaddle.score) + " - " + to_string(rightPaddle.score);
