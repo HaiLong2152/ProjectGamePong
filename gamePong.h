@@ -60,6 +60,13 @@ private:
     bool isMatchPointPause;  // Dừng game khi match point
     Uint32 matchPointPauseTime;  // Thời gian bắt đầu pause
     const Uint32 MATCH_POINT_PAUSE = 1500;
+
+    Uint32 gameStartTime;
+    int leftHits;
+    int rightHits;
+    int currentRally;
+    int longestRally;
+
     bool init();
     bool loadMedia();
     void close();

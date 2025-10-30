@@ -17,15 +17,16 @@ void PongGame::run()
         0
     };
 
+    // Show the main menu
+    if (!showMainMenu())
+        return;
     // Show nhập tên trước
     if (!showNameEntryScreen())
         return;
 
     if (!showConfigScreen())
         return;
-    // Show the main menu
-    if (!showMainMenu())
-        return;
+
 
     SDL_Event e;
     bool continueGame = true; // control main game loop

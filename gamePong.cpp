@@ -31,7 +31,13 @@ PongGame::PongGame() :
     isMatchPointPause(false),
     matchPointPauseTime(0),
     isMatchPoint(false),
-    matchPointPlayer(0)
+    matchPointPlayer(0),
+
+    gameStartTime(0),
+leftHits(0),
+rightHits(0),
+currentRally(0),
+longestRally(0)
 
 {
 }

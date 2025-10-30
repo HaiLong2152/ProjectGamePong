@@ -67,6 +67,9 @@ void PongGame::updateBall()
 {
     // Xử lý phím tạm dừng
 
+    if (gameStartTime == 0)
+        gameStartTime = SDL_GetTicks();
+
     static bool pauseKeyPressed = false;
     const Uint8* currentKeyStates = SDL_GetKeyboardState(NULL);
     if (currentKeyStates[SDL_SCANCODE_P])
@@ -179,6 +182,11 @@ void PongGame::updateBall()
             if (ball.speedX <= 0) ball.speedX = BALL_MIN_SPEED;
             if (abs(ball.speedY) < BALL_MIN_SPEED) ball.speedY = ((ball.speedY > 0) ? 1 : -1) * BALL_MIN_SPEED;
             if (abs(ball.speedY) > BALL_MAX_SPEED) ball.speedY = ((ball.speedY > 0) ? 1 : -1) * BALL_MAX_SPEED;
+
+            leftHits++;
+            currentRally++;
+            if (currentRally > longestRally) longestRally = currentRally;
+
             // Play hit sound
             if (gHitSound != nullptr)
             {
@@ -199,6 +207,11 @@ void PongGame::updateBall()
             if (ball.speedX <= 0) ball.speedX = -BALL_MIN_SPEED;
             if (abs(ball.speedY) < BALL_MIN_SPEED) ball.speedY = ((ball.speedY > 0) ? 1 : -1) * BALL_MIN_SPEED;
             if (abs(ball.speedY) > BALL_MAX_SPEED) ball.speedY = ((ball.speedY > 0) ? 1 : -1) * BALL_MAX_SPEED;
+
+            rightHits++;
+            currentRally++;
+            if (currentRally > longestRally) longestRally = currentRally;
+
             // Play hit sound
             if (gHitSound != nullptr)
             {
@@ -212,6 +225,7 @@ void PongGame::updateBall()
         {
             // Right player scores
             rightPaddle.score++;
+            currentRally=0;
 
             //SDL_Delay(100);
             if (rightPaddle.score == maxScore - 1 && leftPaddle.score < maxScore - 1)
@@ -233,6 +247,8 @@ void PongGame::updateBall()
         {
             // Left player scores
             leftPaddle.score++;
+            currentRally=0;
+
             //SDL_Delay(100);
             if (leftPaddle.score == maxScore - 1 && rightPaddle.score < maxScore - 1)
             {

@@ -31,40 +31,38 @@ void PongGame::renderGame()
         SDL_RenderCopy(gRenderer, gBallTexture, nullptr, &ball.rect);
     // Thong bao MatchPoint
 
-if (isMatchPoint)
-{
-    // Nháy nhanh 0.15s – tăng kịch tính
-    bool flashOn = (SDL_GetTicks() / 150) % 2 == 0;
-
-    if (flashOn)
+    if (isMatchPoint)
     {
-        // MÀU MỚI: XANH BIỂN (P1) / XANH LÁ (P2) – SIÊU ĐẬM, SIÊU SÁNG
-        SDL_Color flashColor = (matchPointPlayer == 1) ?
-            SDL_Color{0, 191, 255, 255} :    // XANH BIỂN SÁNG (#00BFFF) – P1
-            SDL_Color{50, 205, 50, 255};     // XANH LÁ SÁNG (#32CD32) – P2
+        bool flashOn = (SDL_GetTicks() / 150) % 2 == 0;
 
-        string MatchPointplayerName = (matchPointPlayer == 1) ? player1Name :
-                           (gameMode == PLAYER_VS_AI ? "BOT" : player2Name);
+        if (flashOn)
+        {
+            SDL_Color flashColor = (matchPointPlayer == 1) ?
+                                   SDL_Color{0, 191, 255, 255} :
+                                   SDL_Color{50, 205, 50, 255};
 
-        // TEXT TO, ĐẬM, GIỮA MÀN HÌNH
-        renderText(to_string(abs(leftPaddle.score-rightPaddle.score)) + " MATCH POINT for player " + MatchPointplayerName,
-                   SCREEN_WIDTH / 2 - 180,
-                   SCREEN_HEIGHT / 2 - 80,
-                   flashColor, gFont36);
+            string MatchPointplayerName = (matchPointPlayer == 1) ? player1Name :
+                                          (gameMode == PLAYER_VS_AI ? "BOT" : player2Name);
 
-        // === HIỆU ỨNG VIỀN SÁNG + RUNG NHẸ ===
-        SDL_SetRenderDrawColor(gRenderer, flashColor.r, flashColor.g, flashColor.b, 200);
-        int offset = (SDL_GetTicks() / 100) % 4 - 2;  // Rung nhẹ
-        SDL_Rect glow = {
-            SCREEN_WIDTH / 2 - 230 + offset,
-            SCREEN_HEIGHT / 2 - 90 + offset,
-            460, 100
-        };
-        SDL_RenderDrawRect(gRenderer, &glow);
-        SDL_RenderDrawRect(gRenderer, &glow);  // Viền đậm
-        SDL_RenderDrawRect(gRenderer, &glow);  // 3 lớp = siêu sáng
+            // TEXT TO, ĐẬM, GIỮA MÀN HÌNH
+            renderText(to_string(abs(leftPaddle.score-rightPaddle.score)) + " MATCH POINT for " + MatchPointplayerName,
+                       SCREEN_WIDTH / 2 - 180,
+                       SCREEN_HEIGHT / 2 - 80,
+                       flashColor, gFont36);
+
+            SDL_SetRenderDrawColor(gRenderer, flashColor.r, flashColor.g, flashColor.b, 200);
+            int offset = (SDL_GetTicks() / 100) % 4 - 2;
+            SDL_Rect glow =
+            {
+                SCREEN_WIDTH / 2 - 230 + offset,
+                SCREEN_HEIGHT / 2 - 90 + offset,
+                460, 100
+            };
+            SDL_RenderDrawRect(gRenderer, &glow);
+            SDL_RenderDrawRect(gRenderer, &glow);
+            SDL_RenderDrawRect(gRenderer, &glow);
+        }
     }
-}
 
     // Render scores
     SDL_Color textColorBlack = {0, 0, 0, 0};
@@ -165,82 +163,96 @@ if (isMatchPoint)
     SDL_RenderPresent(gRenderer);
 }
 
-// gameRender.cpp
 bool PongGame::showNameEntryScreen()
 {
     SDL_Event e;
-    currentInput = "";  // Reset input
+    string input = "";
+    int currentPlayer = 1;  // 1 = P1, 2 = P2
+    bool done = false;
+    string errorMsg = "";
 
-    while (isEnteringName && !quit)
+    SDL_StartTextInput();
+
+    while (!done && !quit)
     {
         while (SDL_PollEvent(&e) != 0)
         {
             if (e.type == SDL_QUIT)
             {
                 quit = true;
-                isEnteringName = false;
-                return false;
+                break;
             }
-
-            else if (e.type == SDL_KEYDOWN)
+            if (e.type == SDL_KEYDOWN)
             {
-                if (e.key.keysym.sym == SDLK_RETURN)
+                if (e.key.keysym.sym == SDLK_RETURN && !input.empty())
                 {
-                    // Xác nhận tên
-                    if (isPlayer1Turn)
+                    if (currentPlayer == 1)
                     {
-                        player1Name = currentInput.empty() ? "Player 1" : currentInput;
-                        isPlayer1Turn = false;
-                        currentInput = "";
+                        player1Name = input;
+                        if (gameMode == PLAYER_VS_AI)
+                        {
+                            player2Name = "BOT";
+                            done = true;
+                        }
+                        else
+                        {
+                            currentPlayer = 2;
+                            input = "";
+                        }
                     }
                     else
                     {
-                        player2Name = currentInput.empty() ? "Player 2" : currentInput;
-                        isEnteringName = false;  // Kết thúc nhập tên
+                        if (input == player1Name)
+                        {
+                            errorMsg = "Ten khong duoc trung voi P1\n Vui long nhap ten khac.";
+                            input = "";  // Xóa để nhập lại
+                        }
+                        else {
+                        player2Name = input;
+                        done = true;}
                     }
                 }
-                else if (e.key.keysym.sym == SDLK_BACKSPACE && !currentInput.empty())
-                {
-                    currentInput.pop_back();
-                }
-                else if (e.key.keysym.sym == SDLK_ESCAPE)
-                {
-                    quit = true;
-                }
+                else if (e.key.keysym.sym == SDLK_BACKSPACE && !input.empty())
+                    input.pop_back();
             }
-            else if (e.type == SDL_TEXTINPUT)
-            {
-                // Chỉ nhận ký tự in được (a-z, 0-9, space...)
-                if (currentInput.length() < 12)  // Giới hạn 12 ký tự
-                    currentInput += e.text.text;
-            }
+            else if (e.type == SDL_TEXTINPUT && input.length() < 12)
+                input += e.text.text;
         }
+
         SDL_SetRenderDrawColor(gRenderer, 0, 0, 40, 255);
         SDL_RenderClear(gRenderer);
+        if (gMenuBackTexture) SDL_RenderCopy(gRenderer, gMenuBackTexture, nullptr, nullptr);
 
-        if (gMenuBackTexture != nullptr)
-            SDL_RenderCopy(gRenderer, gMenuBackTexture, nullptr, nullptr);
+        renderText("NHAP TEN", SCREEN_WIDTH / 2 - 100, 100, {255, 100, 255, 255}, gFont36);
 
-        SDL_Color white = {255, 255, 255, 255};
-        SDL_Color yellow = {255, 255, 0, 255};
+        string p1 = "P1: " + (currentPlayer == 1 ? input + "_" : player1Name);
+        string p2 = (gameMode == PLAYER_VS_AI) ? "P2: BOT" :
+                    "P2: " + (currentPlayer == 2 ? input + "_" : player2Name);
 
-        renderText("NHAP TEN NGUOI CHOI", SCREEN_WIDTH / 2 - 180, 100, yellow, gFont36);
-
-        string prompt = isPlayer1Turn ? "Nguoi choi 1:" : "Nguoi choi 2:";
-        renderText(prompt, SCREEN_WIDTH / 2 - 150, 200, white, gFont36);
-
-        // Hiển thị ô nhập + con trỏ nhấp nháy
-        string displayText = currentInput + (SDL_GetTicks() % 1000 < 500 ? "_" : "");
-        renderText(displayText, SCREEN_WIDTH / 2 - 150, 260, white, gFont36);
-
-        renderText("Nhan ENTER de xac nhan", SCREEN_WIDTH / 2 - 160, 350, white, gFont24);
-        renderText("Nhan ESC de thoat", SCREEN_WIDTH / 2 - 120, 400, white, gFont24);
+        renderText(p1, SCREEN_WIDTH / 2 - 120, 200, {255, 255, 255, 255}, gFont24);
+        renderText(p2, SCREEN_WIDTH / 2 - 120, 250, {255, 255, 255, 255}, gFont24);
+       if (!errorMsg.empty())
+        {
+            renderText(errorMsg, SCREEN_WIDTH / 2 - 180, 320, {255, 100, 100, 255}, gFont24);
+            // Tự động xóa sau 2 giây
+            static Uint32 errorTime = 0;
+            if (errorTime == 0) errorTime = SDL_GetTicks();
+            if (SDL_GetTicks() - errorTime > 2000)
+            {
+                errorMsg = "";
+                errorTime = 0;
+            }
+        }
+        else
+        {
+            renderText("ENTER de xac nhan", SCREEN_WIDTH / 2 - 130, 320, {255, 255, 0, 255}, gFont24);
+        }
 
         SDL_RenderPresent(gRenderer);
-        SDL_Delay(16);
     }
 
-    return !quit;
+    SDL_StopTextInput();
+    return !quit && done;
 }
 
 bool PongGame::showConfigScreen()
@@ -280,7 +292,6 @@ bool PongGame::showConfigScreen()
             }
         }
 
-        // === RENDER MÀN HÌNH CẤU HÌNH ===
         SDL_SetRenderDrawColor(gRenderer, 0, 0, 40, 255);
         SDL_RenderClear(gRenderer);
         if (gMenuBackTexture != nullptr)
@@ -291,7 +302,7 @@ bool PongGame::showConfigScreen()
 
         renderText("CAI DAT TRAN DAU", SCREEN_WIDTH / 2 - 140, 80, {255, 100, 255, 255}, gFont36);
 
-        renderText("NHAP SO DIEM THANG (5-20):", SCREEN_WIDTH / 2 - 180, 160, white, gFont24);
+        renderText("NHAP SO DIEM THANG (3-20):", SCREEN_WIDTH / 2 - 180, 160, white, gFont24);
         string display = scoreInput + (SDL_GetTicks() % 1000 < 500 ? "_" : "");
         renderText(display, SCREEN_WIDTH / 2 - 40, 200, yellow, gFont36);
 
@@ -316,16 +327,16 @@ bool PongGame::showConfigScreen()
 
 bool PongGame::showMainMenu()
 {
-    bool modeSelected = false; // Chosen a game mode
+    bool modeSelected = false;
     SDL_Event e;
 
     while (!modeSelected && !quit)
     {
-        while (SDL_PollEvent(&e) != 0) // Window close button
+        while (SDL_PollEvent(&e) != 0)
         {
             if (e.type == SDL_QUIT)
                 quit = true;
-            else if (e.type == SDL_KEYDOWN) // Keyboard input
+            else if (e.type == SDL_KEYDOWN)
             {
                 switch (e.key.keysym.sym)
                 {
@@ -368,9 +379,34 @@ bool PongGame::showGameOverScreen()
 {
     bool restartGame = false;
     bool backToMenu = false;
-    SDL_Event e;
 
-    Mix_HaltChannel(-1); // Dừng tất cả âm thanh
+    // Dừng tất cả âm thanh
+    Mix_HaltChannel(-1);
+
+    // Tính thời gian chơi
+    Uint32 gameTime = (SDL_GetTicks() - gameStartTime) / 1000;
+    int minutes = gameTime / 60;
+    int seconds = gameTime % 60;
+
+    // Xác định người thắng
+    bool isP1Win = (leftPaddle.score > rightPaddle.score);
+    string p2Name = (gameMode == PLAYER_VS_AI ? "BOT" : player2Name);
+
+    string winner;
+SDL_Color winColor;
+
+if (gameMode == PLAYER_VS_AI)
+{
+    winner = (isP1Win) ? "VICTORY!" : "DEFEAT!";
+    winColor = (isP1Win) ? SDL_Color{0, 255, 0, 255} : SDL_Color{255, 0, 0, 255};
+}
+else
+{
+    winner = (isP1Win) ? player1Name + " WINS!" : player2Name + " WINS!";
+    winColor = (isP1Win) ? SDL_Color{0, 191, 255, 255} : SDL_Color{50, 205, 50, 255};
+}
+
+    SDL_Event e;
 
     while (!restartGame && !backToMenu && !quit)
     {
@@ -395,58 +431,67 @@ bool PongGame::showGameOverScreen()
             }
         }
 
-        // Clear screen
-        SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 255);
+        //  RENDER MÀN HÌNH KẾT QUẢ
+        SDL_SetRenderDrawColor(gRenderer, 0, 0, 40, 255);
         SDL_RenderClear(gRenderer);
-
         if (gMenuBackTexture != nullptr)
             SDL_RenderCopy(gRenderer, gMenuBackTexture, nullptr, nullptr);
+        renderText(winner, SCREEN_WIDTH / 2 - 100, 80, winColor, gFont36);
 
-        // Render game over text
-        SDL_Color textColor = {255, 255, 255, 255};
-
-        if(gameMode == PLAYER_VS_PLAYER)
-        {
-            if(leftPaddle.score >= maxScore)
-                renderText(player1Name + " Wins!", SCREEN_WIDTH / 2 - 40, 150, {0, 0, 255, 255}, gFont36);
-            else
-                renderText(player2Name + " Wins!", SCREEN_WIDTH / 2 - 40, 150, {0, 255, 0, 255}, gFont36);
-        }
-        else
-        {
-            if(leftPaddle.score >= maxScore)
-                renderText("VICTORY!", SCREEN_WIDTH / 2 - 40, 150, {0, 0, 255, 255}, gFont36);
-            else
-                renderText("DEFEAT!", SCREEN_WIDTH / 2 - 40, 150, {0, 255, 0, 255}, gFont36);
-        }
-
+        // Tỉ số
         string scoreText = to_string(leftPaddle.score) + " - " + to_string(rightPaddle.score);
-        renderText(scoreText.c_str(), SCREEN_WIDTH / 2 - 30, 200, textColor, gFont36);
+        renderText(scoreText, SCREEN_WIDTH / 2 - 50, 140, {255, 255, 255, 255}, gFont36);
 
-        renderText("Press R - Restart Game", SCREEN_WIDTH / 2 - 120, 250, textColor, gFont36);
-        renderText("Press M - Back to Menu", SCREEN_WIDTH / 2 - 120, 300, textColor, gFont36);
-        renderText("Press ESC - Quit", SCREEN_WIDTH / 2 - 120, 350, textColor, gFont36);
+        // Bảng thống kê
+        int y = 200;
+        renderText("=== MATCH SUMMARY ===", SCREEN_WIDTH / 2 - 130, y, {255, 215, 0, 255}, gFont36);
+        y += 95;
+
+        renderText("Time: " + to_string(minutes) + "m" + to_string(seconds) + "s",
+                   SCREEN_WIDTH / 2 - 80, y, {255, 215, 0, 255}, gFont24);
+        y += 35;
+
+        renderText(player1Name + ": " + to_string(leftHits) + " hits",
+                   SCREEN_WIDTH / 2 - 120, y, {0, 191, 255, 255}, gFont24);
+
+        renderText(p2Name + ": " + to_string(rightHits) + " hits",
+                   SCREEN_WIDTH / 2 + 40, y, {50, 205, 50, 255}, gFont24);
+        y += 35;
+
+        renderText("Longest Rally: " + to_string(longestRally) + " hits",
+                   SCREEN_WIDTH / 2 - 120, y, {255, 215, 0, 255}, gFont24);
+        y += 50;
+
+        // Nút điều khiển
+        renderText("R - Restart Game", SCREEN_WIDTH / 2 - 110, y, {255, 215, 0, 255}, gFont24);
+        y += 35;
+        renderText("M - Back to Menu", SCREEN_WIDTH / 2 - 110, y, {255, 215, 0, 255}, gFont24);
+        y += 35;
+        renderText("ESC - Quit", SCREEN_WIDTH / 2 - 80, y, {255, 215, 0, 255}, gFont24);
 
         SDL_RenderPresent(gRenderer);
     }
 
+    //  XỬ LÝ SAU KHI CHỌN
     if (restartGame)
     {
-        // Reset scores
         leftPaddle.score = 0;
         rightPaddle.score = 0;
-
+        leftHits = rightHits = 0;
+        currentRally = longestRally = 0;
+        gameStartTime = SDL_GetTicks();  // Reset thời gian
         resetBall((rand() % 2 == 0) ? 1 : -1);
         return true;
     }
 
     if (backToMenu)
     {
-        // Reset scores
         leftPaddle.score = 0;
         rightPaddle.score = 0;
+        leftHits = rightHits = 0;
+        currentRally = longestRally = 0;
         return showMainMenu();
     }
-    //if player chose to quit
-    return false;
+
+    return false;  // Thoát game
 }
