@@ -42,7 +42,7 @@ void PongGame::renderGame()
             string MatchPointplayerName = (matchPointPlayer == 1) ? player1Name :
                                           (gameMode == PLAYER_VS_AI ? "BOT" : player2Name);
             // TEXT TO, ĐẬM, GIỮA MÀN HÌNH
-            renderText(to_string(abs(leftPaddle.score-rightPaddle.score)) + " MATCH POINT for " + MatchPointplayerName,
+            renderText(" MATCH POINT for " + MatchPointplayerName,
                        SCREEN_WIDTH / 2 - 180,
                        SCREEN_HEIGHT / 2 - 80,
                        flashColor, gFont36);
@@ -73,8 +73,8 @@ void PongGame::renderGame()
             {
                 SDL_Rect scoreGlow =
                 {
-                    SCREEN_WIDTH / 4 - pulseSize / 2 + i * 2,
-                    50 - pulseSize / 2 + i * 2,
+                    SCREEN_WIDTH / 4 - pulseSize / 2 + i * 2 + 10,
+                    50 - pulseSize / 2 + i * 2 - 10,
                     pulseSize - i * 4,
                     pulseSize - i * 4
                 };
@@ -90,8 +90,8 @@ void PongGame::renderGame()
             {
                 SDL_Rect scoreGlow =
                 {
-                    3 * SCREEN_WIDTH / 4 - pulseSize / 2 + i * 2,
-                    50 - pulseSize / 2 + i * 2,
+                    3 * SCREEN_WIDTH / 4 - pulseSize / 2 + i * 2 + 10,
+                    50 - pulseSize / 2 + i * 2 - 10,
                     pulseSize - i * 4,
                     pulseSize - i * 4
                 };
@@ -476,17 +476,20 @@ bool PongGame::showGameOverScreen()
         SDL_RenderClear(gRenderer);
         if (gMenuBackTexture != nullptr)
             SDL_RenderCopy(gRenderer, gMenuBackTexture, nullptr, nullptr);
-        renderText(winner, SCREEN_WIDTH / 2 - 60, 80, winColor, gFont36);
-
-        // Tỉ số
-        string scoreText = to_string(leftPaddle.score) + " - " + to_string(rightPaddle.score);
-        renderText(scoreText, SCREEN_WIDTH / 2 - 50, 140, {255, 255, 255, 255}, gFont36);
-
-        // Bảng thống kê
-        int y = 200;
-        renderText("=== MATCH SUMMARY ===", SCREEN_WIDTH / 2 - 130, y, {255, 215, 0, 255}, gFont36);
+            // Bảng thống kê
+        int y = 60;
+        renderText("=== MATCH SUMMARY ===", SCREEN_WIDTH / 2 - 150, y, {255, 215, 0, 255}, gFont36);
         y += 95;
 
+        renderText(winner, SCREEN_WIDTH / 2 - 60, y, winColor, gFont36);
+
+        y += 60;
+        // Tỉ số
+        string scoreText = to_string(leftPaddle.score) + " - " + to_string(rightPaddle.score);
+        renderText(scoreText, SCREEN_WIDTH / 2 - 50, y, {255, 215, 0, 255}, gFont36);
+
+
+        y += 60;
         renderText("Time: " + to_string(minutes) + "m" + to_string(seconds) + "s",
                    SCREEN_WIDTH / 2 - 80, y, {255, 215, 0, 255}, gFont24);
         y += 35;
@@ -495,7 +498,7 @@ bool PongGame::showGameOverScreen()
                    SCREEN_WIDTH / 2 - 120, y, {0, 191, 255, 255}, gFont24);
 
         renderText(p2Name + ": " + to_string(rightHits) + " hits",
-                   SCREEN_WIDTH / 2 + 40, y, {50, 205, 50, 255}, gFont24);
+                   SCREEN_WIDTH / 2 + 30, y, {50, 205, 50, 255}, gFont24);
         y += 35;
 
         renderText("Longest Rally: " + to_string(longestRally) + " hits",

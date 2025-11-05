@@ -50,5 +50,3 @@ bool PongGame::initialize()
 {
     return init() && loadMedia();
 }
-
-
